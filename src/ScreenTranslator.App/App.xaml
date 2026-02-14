@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+
         <!-- Dark Theme Colors -->
         <Color x:Key="BgPrimary">#1a1b2e</Color>
         <Color x:Key="BgSecondary">#252642</Color>

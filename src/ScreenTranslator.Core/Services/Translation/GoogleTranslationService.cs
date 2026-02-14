@@ -33,4 +33,9 @@ public class GoogleTranslationService : ITranslationService
             Provider: ProviderName,
             Timestamp: DateTime.UtcNow);
     }
+
+    public Task<TranslationResult> TranslateImageAsync(byte[] imageData, string sourceLang, string targetLang)
+    {
+        throw new NotSupportedException("Google Translate does not support vision/image translation. Select an OpenAI-compatible provider with a vision model.");
+    }
 }

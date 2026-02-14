@@ -20,6 +20,11 @@ public class TranslationRouter : ITranslationService
         return GetCurrentProvider().TranslateAsync(text, sourceLang, targetLang);
     }
 
+    public Task<TranslationResult> TranslateImageAsync(byte[] imageData, string sourceLang, string targetLang)
+    {
+        return GetCurrentProvider().TranslateImageAsync(imageData, sourceLang, targetLang);
+    }
+
     private ITranslationService GetCurrentProvider()
     {
         var provider = _configService.Config.TranslationProvider;

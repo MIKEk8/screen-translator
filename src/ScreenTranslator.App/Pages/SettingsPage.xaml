@@ -163,6 +163,12 @@
                                 <TextBox Text="{Binding OpenAiSystemPrompt, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"
                                          TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60"/>
+
+                                <CheckBox Content="Vision mode (send screenshot directly, skip OCR)"
+                                          IsChecked="{Binding UseVision}"
+                                          Visibility="{Binding ShowVisionOption, Converter={StaticResource BoolToVisibility}}"
+                                          Foreground="{StaticResource TextPrimaryBrush}"
+                                          FontSize="12" Margin="0,10,0,0"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>

@@ -70,4 +70,68 @@ public class OpenAiTranslationService : ITranslationService
             Provider: $"{ProviderName} ({_config.Model})",
             Timestamp: DateTime.UtcNow);
     }
+
+    public async Task<TranslationResult> TranslateImageAsync(byte[] imageData, string sourceLang, string targetLang)
+    {
+        if (string.IsNullOrWhiteSpace(_config.ApiKey))
+            throw new InvalidOperationException("OpenAI API key is not configured. Set it in Settings.");
+
+        var endpoint = _config.ApiEndpoint.TrimEnd('/');
+        var url = $"{endpoint}/chat/completions";
+
+        var systemPrompt = string.IsNullOrWhiteSpace(_config.SystemPrompt)
+            ? $"You are a translator. Translate the text visible in the image from {sourceLang} to {targetLang}. Return ONLY the translated text, nothing else. Do not add explanations or notes."
+            : _config.SystemPrompt
+                .Replace("{source}", sourceLang)
+                .Replace("{target}", targetLang);
+
+        var base64Image = Convert.ToBase64String(imageData);
+
+        var requestBody = new
+        {
+            model = _config.Model,
+            messages = new object[]
+            {
+                new { role = "system", content = systemPrompt },
+                new
+                {
+                    role = "user",
+                    content = new object[]
+                    {
+                        new { type = "text", text = $"Translate the text in this image from {sourceLang} to {targetLang}." },
+                        new { type = "image_url", image_url = new { url = $"data:image/png;base64,{base64Image}" } }
+                    }
+                }
+            },
+            temperature = 0.3
+        };
+
+        var json = JsonSerializer.Serialize(requestBody);
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        request.Headers.Add("Authorization", $"Bearer {_config.ApiKey}");
+
+        var response = await _httpClient.SendAsync(request);
+        var responseBody = await response.Content.ReadAsStringAsync();
+
+        if (!response.IsSuccessStatusCode)
+            throw new HttpRequestException($"OpenAI API error ({response.StatusCode}): {responseBody}");
+
+        var doc = JsonDocument.Parse(responseBody);
+        var translated = doc.RootElement
+            .GetProperty("choices")[0]
+            .GetProperty("message")
+            .GetProperty("content")
+            .GetString()?.Trim() ?? "";
+
+        return new TranslationResult(
+            OriginalText: "[image]",
+            TranslatedText: translated,
+            SourceLanguage: sourceLang,
+            TargetLanguage: targetLang,
+            Provider: $"{ProviderName} Vision ({_config.Model})",
+            Timestamp: DateTime.UtcNow);
+    }
 }

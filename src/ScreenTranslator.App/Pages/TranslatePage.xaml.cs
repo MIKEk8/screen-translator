@@ -129,21 +129,50 @@ public partial class TranslatePage : Page
     {
         try
         {
-            StatusText.Text = "Recognizing text...";
-            var ocrResult = await _ocrService.RecognizeAsync(
-                screenshot.ImageData,
-                _configService.Config.SourceLanguage);
+            var config = _configService.Config;
+            var useVision = config.TranslationProvider == TranslationProvider.OpenAiCompatible
+                            && config.GetActivePreset().UseVision;
 
-            var cleanText = ocrResult.Text.Replace("\r\n", " ").Replace("\n", " ");
-            SourceTextBox.Text = cleanText;
-
-            if (!string.IsNullOrWhiteSpace(cleanText))
+            if (useVision)
             {
-                await TranslateText(cleanText);
+                StatusText.Text = "Translating image (vision)...";
+                SourceTextBox.Text = "[vision mode — OCR skipped]";
+
+                var sw = Stopwatch.StartNew();
+                var result = await _translationService.TranslateImageAsync(
+                    screenshot.ImageData,
+                    config.SourceLanguage,
+                    config.TargetLanguage);
+                sw.Stop();
+
+                TargetTextBox.Text = result.TranslatedText;
+
+                var elapsed = sw.ElapsedMilliseconds < 1000
+                    ? $"{sw.ElapsedMilliseconds}ms"
+                    : $"{sw.Elapsed.TotalSeconds:F1}s";
+                StatusText.Text = $"{result.Provider} — {elapsed}";
+
+                if (config.Tts.AutoSpeakTranslation)
+                    _ = SpeakText(result.TranslatedText);
             }
             else
             {
-                StatusText.Text = "No text detected";
+                StatusText.Text = "Recognizing text...";
+                var ocrResult = await _ocrService.RecognizeAsync(
+                    screenshot.ImageData,
+                    config.SourceLanguage);
+
+                var cleanText = ocrResult.Text.Replace("\r\n", " ").Replace("\n", " ");
+                SourceTextBox.Text = cleanText;
+
+                if (!string.IsNullOrWhiteSpace(cleanText))
+                {
+                    await TranslateText(cleanText);
+                }
+                else
+                {
+                    StatusText.Text = "No text detected";
+                }
             }
         }
         catch (Exception ex)

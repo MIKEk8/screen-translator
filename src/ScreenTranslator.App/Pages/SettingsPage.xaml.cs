@@ -41,6 +41,9 @@ public partial class SettingsPage : Page
         {
             _suppressModelPopup = true;
             vm.OpenAiModel = model.Id;
+            vm.SelectedModelSupportsVision = model.SupportsVision;
+            if (!model.SupportsVision)
+                vm.UseVision = false;
             ModelPopup.IsOpen = false;
             _suppressModelPopup = false;
         }

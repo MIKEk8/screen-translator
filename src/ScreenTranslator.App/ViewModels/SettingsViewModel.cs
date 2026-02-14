@@ -62,6 +62,32 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _openAiSystemPrompt = "";
 
+    [ObservableProperty]
+    private bool _useVision;
+
+    /// <summary>
+    /// True when models aren't loaded yet (manual control) or selected model supports vision.
+    /// </summary>
+    public bool ShowVisionOption => !_modelsLoaded || _selectedModelSupportsVision;
+
+    private bool _modelsLoaded;
+    private bool _selectedModelSupportsVision;
+
+    /// <summary>
+    /// Update vision availability for the current model and refresh UI.
+    /// </summary>
+    public bool SelectedModelSupportsVision
+    {
+        get => _selectedModelSupportsVision;
+        set
+        {
+            if (_selectedModelSupportsVision == value) return;
+            _selectedModelSupportsVision = value;
+            OnPropertyChanged(nameof(SelectedModelSupportsVision));
+            OnPropertyChanged(nameof(ShowVisionOption));
+        }
+    }
+
     public ObservableCollection<ModelInfo> FilteredModels { get; } = [];
     private List<ModelInfo> _allModels = [];
 
@@ -124,16 +150,22 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnSelectedPresetChanged(OpenAiPreset? value)
     {
         if (value is null) return;
+        var wasLoading = _isLoading;
         _isLoading = true;
         PresetName = value.Name;
         OpenAiEndpoint = value.ApiEndpoint;
         OpenAiApiKey = value.ApiKey;
         OpenAiModel = value.Model;
         OpenAiSystemPrompt = value.SystemPrompt;
-        _isLoading = false;
+        UseVision = value.UseVision;
+        SelectedModelSupportsVision = _allModels.FirstOrDefault(m => m.Id == value.Model)?.SupportsVision ?? value.UseVision;
+        _isLoading = wasLoading;
 
-        _configService.Config.ActiveOpenAiPreset = value.Name;
-        ScheduleAutoSave();
+        if (!_isLoading)
+        {
+            _configService.Config.ActiveOpenAiPreset = value.Name;
+            ScheduleAutoSave();
+        }
     }
 
     partial void OnPresetNameChanged(string value)
@@ -160,6 +192,7 @@ public partial class SettingsViewModel : ObservableObject
         SelectedPreset.ApiKey = OpenAiApiKey;
         SelectedPreset.Model = OpenAiModel;
         SelectedPreset.SystemPrompt = OpenAiSystemPrompt;
+        SelectedPreset.UseVision = UseVision;
     }
 
     [RelayCommand]
@@ -230,10 +263,20 @@ public partial class SettingsViewModel : ObservableObject
                     }
                 }
 
-                _allModels.Add(new ModelInfo(id, name, pricing));
+                var supportsVision = false;
+                if (model.TryGetProperty("architecture", out var arch) &&
+                    arch.TryGetProperty("input_modalities", out var modalities))
+                {
+                    supportsVision = modalities.EnumerateArray()
+                        .Any(m => m.GetString() is "image");
+                }
+
+                _allModels.Add(new ModelInfo(id, name, pricing, supportsVision));
             }
 
             FilterModels("");
+            _modelsLoaded = true;
+            SelectedModelSupportsVision = _allModels.FirstOrDefault(m => m.Id == OpenAiModel)?.SupportsVision ?? false;
             StatusMessage = $"Loaded {_allModels.Count} models";
         }
         catch (Exception ex)
@@ -286,10 +329,11 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnShowOverlayOnTranslateChanged(bool value) => ScheduleAutoSave();
     partial void OnOllamaEndpointChanged(string value) => ScheduleAutoSave();
     partial void OnOllamaModelChanged(string value) => ScheduleAutoSave();
-    partial void OnOpenAiEndpointChanged(string value) { ApplyFieldsToSelectedPreset(); ScheduleAutoSave(); }
-    partial void OnOpenAiApiKeyChanged(string value) { ApplyFieldsToSelectedPreset(); ScheduleAutoSave(); }
-    partial void OnOpenAiModelChanged(string value) { ApplyFieldsToSelectedPreset(); ScheduleAutoSave(); }
-    partial void OnOpenAiSystemPromptChanged(string value) { ApplyFieldsToSelectedPreset(); ScheduleAutoSave(); }
+    partial void OnOpenAiEndpointChanged(string value) { if (!_isLoading) ApplyFieldsToSelectedPreset(); ScheduleAutoSave(); }
+    partial void OnOpenAiApiKeyChanged(string value) { if (!_isLoading) ApplyFieldsToSelectedPreset(); ScheduleAutoSave(); }
+    partial void OnOpenAiModelChanged(string value) { if (!_isLoading) ApplyFieldsToSelectedPreset(); ScheduleAutoSave(); }
+    partial void OnOpenAiSystemPromptChanged(string value) { if (!_isLoading) ApplyFieldsToSelectedPreset(); ScheduleAutoSave(); }
+    partial void OnUseVisionChanged(bool value) { if (!_isLoading) ApplyFieldsToSelectedPreset(); ScheduleAutoSave(); }
     partial void OnSelectedVoiceChanged(string value) => ScheduleAutoSave();
     partial void OnTtsRateChanged(int value) => ScheduleAutoSave();
     partial void OnTtsVolumeChanged(int value) => ScheduleAutoSave();
@@ -368,7 +412,11 @@ public partial class SettingsViewModel : ObservableObject
     }
 }
 
-public record ModelInfo(string Id, string Name, string? Pricing)
+public record ModelInfo(string Id, string Name, string? Pricing, bool SupportsVision)
 {
-    public override string ToString() => Pricing is not null ? $"{Name}  ({Pricing})" : Name;
+    public override string ToString()
+    {
+        var vision = SupportsVision ? " [vision]" : "";
+        return Pricing is not null ? $"{Name}{vision}  ({Pricing})" : $"{Name}{vision}";
+    }
 }

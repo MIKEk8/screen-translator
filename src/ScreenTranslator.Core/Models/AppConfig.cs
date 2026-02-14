@@ -94,6 +94,7 @@ public class OpenAiPreset
     public string ApiKey { get; set; } = "";
     public string Model { get; set; } = "gpt-4o-mini";
     public string SystemPrompt { get; set; } = "";
+    public bool UseVision { get; set; }
 
     public override string ToString() => Name;
 }
