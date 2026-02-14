@@ -1,0 +1,54 @@
+<Window x:Class="ScreenTranslator.App.Windows.AreaSelectorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Background="Transparent"
+        Cursor="Cross"
+        KeyDown="Window_KeyDown">
+
+    <Grid>
+        <!-- Dark overlay (4 rectangles around selection) -->
+        <Canvas x:Name="OverlayCanvas" Background="#01000000">
+            <!-- Semi-transparent dark background -->
+            <Rectangle x:Name="DarkOverlay"
+                       Fill="#88000000"
+                       Canvas.Left="0" Canvas.Top="0"/>
+
+            <!-- Top dark region -->
+            <Rectangle x:Name="TopRegion" Fill="#88000000"/>
+            <!-- Bottom dark region -->
+            <Rectangle x:Name="BottomRegion" Fill="#88000000"/>
+            <!-- Left dark region -->
+            <Rectangle x:Name="LeftRegion" Fill="#88000000"/>
+            <!-- Right dark region -->
+            <Rectangle x:Name="RightRegion" Fill="#88000000"/>
+
+            <!-- Selection rectangle border -->
+            <Rectangle x:Name="SelectionRect"
+                       Stroke="#7c5cfc" StrokeThickness="2"
+                       StrokeDashArray="4 2"
+                       Fill="Transparent"
+                       Visibility="Collapsed"/>
+
+            <!-- Size label -->
+            <Border x:Name="SizeLabel"
+                    Background="#CC1a1b2e" CornerRadius="4"
+                    Padding="8,4" Visibility="Collapsed">
+                <TextBlock x:Name="SizeLabelText"
+                           Foreground="#e8e6f0" FontSize="12"
+                           FontFamily="Consolas"/>
+            </Border>
+        </Canvas>
+
+        <!-- Instructions -->
+        <TextBlock Text="Draw a rectangle to select area. Press ESC to cancel."
+                   Foreground="#99e8e6f0" FontSize="14"
+                   HorizontalAlignment="Center" VerticalAlignment="Top"
+                   Margin="0,40,0,0"
+                   x:Name="InstructionText"/>
+    </Grid>
+</Window>

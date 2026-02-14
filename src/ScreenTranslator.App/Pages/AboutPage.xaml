@@ -1,0 +1,130 @@
+<Page x:Class="ScreenTranslator.App.Pages.AboutPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Background="Transparent">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16">
+        <StackPanel MaxWidth="640">
+
+            <TextBlock Text="About" FontSize="22" FontWeight="Bold"
+                       Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,24"/>
+
+            <!-- App Info -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Image Source="/icon.ico" Width="48" Height="48" Margin="0,0,14,0"
+                               RenderOptions.BitmapScalingMode="HighQuality" VerticalAlignment="Center"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Screen Translator" FontSize="20" FontWeight="Bold"
+                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                            <TextBlock x:Name="VersionText" FontSize="12"
+                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Text="Desktop app for screen capture, OCR text recognition, and real-time translation."
+                               Foreground="{StaticResource TextSecondaryBrush}" FontSize="13"
+                               TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Build time" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock x:Name="BuildTimeText" Grid.Column="1"
+                                   Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"/>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Runtime" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock x:Name="RuntimeText" Grid.Column="1"
+                                   Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"/>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Platform" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock x:Name="PlatformText" Grid.Column="1"
+                                   Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Stack -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="TECHNOLOGY" FontSize="11" FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
+
+                    <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap">
+                        <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">UI:</Run>
+                        <Run>WPF (.NET 9, C#)</Run>
+                        <LineBreak/>
+                        <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">OCR:</Run>
+                        <Run>Windows.Media.Ocr (WinRT)</Run>
+                        <LineBreak/>
+                        <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">Translation:</Run>
+                        <Run>Google, DeepL, OpenAI-compatible</Run>
+                        <LineBreak/>
+                        <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">TTS:</Run>
+                        <Run>SAPI5 (System.Speech)</Run>
+                        <LineBreak/>
+                        <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">MVVM:</Run>
+                        <Run>CommunityToolkit.Mvvm</Run>
+                    </TextBlock>
+                </StackPanel>
+            </Border>
+
+            <!-- Hotkeys Reference -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="HOTKEYS" FontSize="11" FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
+
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Alt+A" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Column="1" Text="Capture screen area (hold 2s to reuse last region)"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                    </Grid>
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Alt+C" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Column="1" Text="Copy selected text and translate"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Alt+X" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Column="1" Text="Stop speech"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Author -->
+            <TextBlock Text="Personal project" FontSize="11"
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       HorizontalAlignment="Center" Margin="0,0,0,24"/>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>
