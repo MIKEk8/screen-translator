@@ -17,6 +17,7 @@ dotnet run --project src/ScreenTranslator.App   # Run
 
 # Release: single-file self-contained ~128 MB exe + translations/
 dotnet publish src/ScreenTranslator.App -c Release -r win-x64 --self-contained \
+  -o publish \
   -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true \
   -p:PublishTrimmed=true -p:TrimMode=partial \
   -p:SuppressTrimAnalysisWarnings=true \
