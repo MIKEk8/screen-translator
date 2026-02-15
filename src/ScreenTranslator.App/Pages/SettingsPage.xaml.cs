@@ -2,17 +2,75 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using ScreenTranslator.App.ViewModels;
+using ScreenTranslator.Core.Services.Localization;
 
 namespace ScreenTranslator.App.Pages;
 
 public partial class SettingsPage : Page
 {
+    private readonly ILocalizationService _loc;
     private bool _suppressModelPopup;
 
     public SettingsPage()
     {
         InitializeComponent();
         DataContext = App.Services.GetRequiredService<SettingsViewModel>();
+
+        _loc = App.Services.GetRequiredService<ILocalizationService>();
+        ApplyTranslations();
+        _loc.LanguageChanged += _ => Dispatcher.Invoke(ApplyTranslations);
+    }
+
+    private void ApplyTranslations()
+    {
+        TitleText.Text = _loc.T("settings.title");
+        LangSectionText.Text = _loc.T("settings.language");
+        InterfaceLangText.Text = _loc.T("settings.interface_lang");
+        ValidateButton.Content = _loc.T("settings.validate");
+
+        TranslationSectionText.Text = _loc.T("settings.translation");
+        ProviderText.Text = _loc.T("settings.provider");
+        OcrEngineText.Text = _loc.T("settings.ocr_engine");
+
+        OpenAiTitleText.Text = _loc.T("settings.openai_title");
+        PresetText.Text = _loc.T("settings.preset");
+        AddPresetBtn.ToolTip = _loc.T("settings.add_preset");
+        RemovePresetBtn.ToolTip = _loc.T("settings.remove_preset");
+        NameText.Text = _loc.T("settings.name");
+        EndpointText.Text = _loc.T("settings.endpoint");
+        ApiKeyText.Text = _loc.T("settings.api_key");
+        ModelText.Text = _loc.T("settings.model");
+        FetchModelsBtn.ToolTip = _loc.T("settings.fetch_models");
+        SystemPromptText.Text = _loc.T("settings.system_prompt");
+        VisionCheckBox.Content = _loc.T("settings.vision_mode");
+
+        OllamaTitleText.Text = _loc.T("settings.ollama_title");
+        OllamaEndpointText.Text = _loc.T("settings.endpoint");
+        OllamaModelText.Text = _loc.T("settings.model");
+
+        TtsSectionText.Text = _loc.T("settings.tts");
+        VoiceText.Text = _loc.T("settings.voice");
+        SpeedText.Text = _loc.T("settings.speed");
+        VolumeText.Text = _loc.T("settings.volume");
+        AutoSpeakCheckBox.Content = _loc.T("settings.auto_speak");
+        TestVoiceBtn.Content = $"\u25B6 {_loc.T("settings.test")}";
+
+        HotkeysSectionText.Text = _loc.T("settings.hotkeys");
+        HotkeyCaptureText.Text = _loc.T("settings.hotkey_capture");
+        HotkeyCopyText.Text = _loc.T("settings.hotkey_copy");
+        HotkeyStopText.Text = _loc.T("settings.hotkey_stop");
+
+        GestureSectionText.Text = _loc.T("settings.gesture");
+        GestureEnableCheckBox.Content = _loc.T("settings.gesture_enable");
+        GestureButtonText.Text = _loc.T("settings.gesture_button");
+        GestureHintText.Text = _loc.T("settings.gesture_hint");
+
+        OverlaySectionText.Text = _loc.T("settings.overlay");
+        OverlayShowCheckBox.Content = _loc.T("settings.overlay_show");
+        OpacityText.Text = _loc.T("settings.opacity");
+        FontSizeText.Text = _loc.T("settings.font_size");
+
+        ResetButton.Content = _loc.T("settings.reset");
     }
 
     private void ModelSearchBox_GotFocus(object sender, RoutedEventArgs e)

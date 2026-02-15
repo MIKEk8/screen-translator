@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ScreenTranslator.Core.Services.Config;
 using ScreenTranslator.Core.Services.Hotkey;
 using ScreenTranslator.Core.Services.Interfaces;
+using ScreenTranslator.Core.Services.Localization;
 using ScreenTranslator.Core.Services.Ocr;
 using ScreenTranslator.Core.Services.Screenshot;
 using ScreenTranslator.Core.Services.Translation;
@@ -11,10 +12,11 @@ namespace ScreenTranslator.Core;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddScreenTranslatorCore(this IServiceCollection services)
+    public static IServiceCollection AddScreenTranslatorCore(this IServiceCollection services, string translationsDir = "translations")
     {
+        services.AddSingleton<ILocalizationService>(new LocalizationService(translationsDir));
         services.AddSingleton<IConfigService, JsonConfigService>();
-        services.AddSingleton<IOcrService, WindowsOcrService>();
+        services.AddSingleton<IOcrService, OcrRouter>();
         services.AddSingleton<IScreenshotService, ScreenshotService>();
         services.AddSingleton<ITranslationService, TranslationRouter>();
         services.AddSingleton<ITtsService, SapiTtsService>();

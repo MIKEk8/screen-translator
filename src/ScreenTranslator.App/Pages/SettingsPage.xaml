@@ -7,13 +7,13 @@
         <StackPanel MaxWidth="640">
 
             <!-- Page Title -->
-            <TextBlock Text="Settings" FontSize="22" FontWeight="Bold"
+            <TextBlock x:Name="TitleText" Text="Settings" FontSize="22" FontWeight="Bold"
                        Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,24"/>
 
-            <!-- ═══ Translation Provider ═══ -->
+            <!-- ═══ Language ═══ -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="TRANSLATION" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
+                    <TextBlock x:Name="LangSectionText" Text="LANGUAGE" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                Margin="0,0,0,14"/>
 
                     <Grid Margin="0,0,0,12">
@@ -21,7 +21,34 @@
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Provider" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="InterfaceLangText" Text="Interface language" Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center" FontSize="13"/>
+                        <ComboBox Grid.Column="1"
+                                  ItemsSource="{Binding AvailableInterfaceLanguages}"
+                                  SelectedItem="{Binding SelectedInterfaceLanguage}"
+                                  Style="{StaticResource DarkComboBox}"/>
+                    </Grid>
+
+                    <Button x:Name="ValidateButton" Content="Validate translations"
+                            Command="{Binding ValidateTranslationsCommand}"
+                            Style="{StaticResource AccentButton}"
+                            Background="{StaticResource BgTertiaryBrush}"
+                            Padding="14,6" FontSize="12" HorizontalAlignment="Left"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ═══ Translation Provider ═══ -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock x:Name="TranslationSectionText" Text="TRANSLATION" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,14"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="ProviderText" Text="Provider" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
                         <ComboBox Grid.Column="1"
                                   ItemsSource="{Binding Providers}"
@@ -34,7 +61,7 @@
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="OCR Engine" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="OcrEngineText" Text="OCR Engine" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
                         <ComboBox Grid.Column="1"
                                   ItemsSource="{Binding OcrEngines}"
@@ -58,7 +85,7 @@
                         <Border Background="{StaticResource BgTertiaryBrush}" CornerRadius="8"
                                 Padding="14" Margin="0,0,0,4">
                             <StackPanel>
-                                <TextBlock Text="OpenAI Compatible Settings" FontSize="12" FontWeight="SemiBold"
+                                <TextBlock x:Name="OpenAiTitleText" Text="OpenAI Compatible Settings" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
 
                                 <!-- Preset selector -->
@@ -69,18 +96,18 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Preset" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock x:Name="PresetText" Text="Preset" Foreground="{StaticResource TextSecondaryBrush}"
                                                VerticalAlignment="Center" FontSize="12"/>
                                     <ComboBox Grid.Column="1"
                                               ItemsSource="{Binding OpenAiPresets}"
                                               SelectedItem="{Binding SelectedPreset}"
                                               DisplayMemberPath="Name"
                                               Style="{StaticResource DarkComboBox}"/>
-                                    <Button Grid.Column="2" Content="+" ToolTip="Add preset"
+                                    <Button x:Name="AddPresetBtn" Grid.Column="2" Content="+" ToolTip="Add preset"
                                             Command="{Binding AddPresetCommand}"
                                             Style="{StaticResource AccentButton}"
                                             Padding="8,4" FontSize="14" FontWeight="Bold" Margin="4,0,0,0"/>
-                                    <Button Grid.Column="3" Content="&#x2212;" ToolTip="Remove preset"
+                                    <Button x:Name="RemovePresetBtn" Grid.Column="3" Content="&#x2212;" ToolTip="Remove preset"
                                             Command="{Binding RemovePresetCommand}"
                                             Style="{StaticResource AccentButton}"
                                             Background="#e74c3c"
@@ -92,7 +119,7 @@
                                         <ColumnDefinition Width="100"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Name" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock x:Name="NameText" Text="Name" Foreground="{StaticResource TextSecondaryBrush}"
                                                VerticalAlignment="Center" FontSize="12"/>
                                     <TextBox Grid.Column="1" Text="{Binding PresetName, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
@@ -103,7 +130,7 @@
                                         <ColumnDefinition Width="100"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Endpoint" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock x:Name="EndpointText" Text="Endpoint" Foreground="{StaticResource TextSecondaryBrush}"
                                                VerticalAlignment="Center" FontSize="12"/>
                                     <TextBox Grid.Column="1" Text="{Binding OpenAiEndpoint, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
@@ -114,7 +141,7 @@
                                         <ColumnDefinition Width="100"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="API Key" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock x:Name="ApiKeyText" Text="API Key" Foreground="{StaticResource TextSecondaryBrush}"
                                                VerticalAlignment="Center" FontSize="12"/>
                                     <TextBox Grid.Column="1" Text="{Binding OpenAiApiKey, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
@@ -126,7 +153,7 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Model" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock x:Name="ModelText" Text="Model" Foreground="{StaticResource TextSecondaryBrush}"
                                                VerticalAlignment="Center" FontSize="12"/>
                                     <Grid Grid.Column="1">
                                         <TextBox x:Name="ModelSearchBox"
@@ -150,21 +177,21 @@
                                             </Border>
                                         </Popup>
                                     </Grid>
-                                    <Button Grid.Column="2" Content="&#x1F504;"
+                                    <Button x:Name="FetchModelsBtn" Grid.Column="2" Content="&#x1F504;"
                                             ToolTip="Fetch models from API"
                                             Command="{Binding FetchModelsCommand}"
                                             Style="{StaticResource AccentButton}"
                                             Padding="8,4" FontSize="13" Margin="4,0,0,0"/>
                                 </Grid>
 
-                                <TextBlock Text="System Prompt (optional, {source}/{target} placeholders)"
+                                <TextBlock x:Name="SystemPromptText" Text="System Prompt (optional, {source}/{target} placeholders)"
                                            Foreground="{StaticResource TextSecondaryBrush}"
                                            FontSize="11" Margin="0,0,0,4"/>
                                 <TextBox Text="{Binding OpenAiSystemPrompt, UpdateSourceTrigger=PropertyChanged}"
                                          Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"
                                          TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60"/>
 
-                                <CheckBox Content="Vision mode (send screenshot directly, skip OCR)"
+                                <CheckBox x:Name="VisionCheckBox" Content="Vision mode (send screenshot directly, skip OCR)"
                                           IsChecked="{Binding UseVision}"
                                           Visibility="{Binding ShowVisionOption, Converter={StaticResource BoolToVisibility}}"
                                           Foreground="{StaticResource TextPrimaryBrush}"
@@ -189,7 +216,7 @@
                         <Border Background="{StaticResource BgTertiaryBrush}" CornerRadius="8"
                                 Padding="14" Margin="0,0,0,4">
                             <StackPanel>
-                                <TextBlock Text="Ollama Settings" FontSize="12" FontWeight="SemiBold"
+                                <TextBlock x:Name="OllamaTitleText" Text="Ollama Settings" FontSize="12" FontWeight="SemiBold"
                                            Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
 
                                 <Grid Margin="0,0,0,8">
@@ -197,7 +224,7 @@
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Endpoint" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock x:Name="OllamaEndpointText" Text="Endpoint" Foreground="{StaticResource TextSecondaryBrush}"
                                                VerticalAlignment="Center" FontSize="12"/>
                                     <TextBox Grid.Column="1" Text="{Binding OllamaEndpoint, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
@@ -208,7 +235,7 @@
                                         <ColumnDefinition Width="80"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Model" Foreground="{StaticResource TextSecondaryBrush}"
+                                    <TextBlock x:Name="OllamaModelText" Text="Model" Foreground="{StaticResource TextSecondaryBrush}"
                                                VerticalAlignment="Center" FontSize="12"/>
                                     <TextBox Grid.Column="1" Text="{Binding OllamaModel, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
@@ -222,7 +249,7 @@
             <!-- ═══ Text-to-Speech ═══ -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="TEXT-TO-SPEECH" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
+                    <TextBlock x:Name="TtsSectionText" Text="TEXT-TO-SPEECH" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                Margin="0,0,0,14"/>
 
                     <Grid Margin="0,0,0,12">
@@ -230,7 +257,7 @@
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Voice" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="VoiceText" Text="Voice" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
                         <ComboBox Grid.Column="1"
                                   ItemsSource="{Binding AvailableVoices}"
@@ -244,7 +271,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Speed" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="SpeedText" Text="Speed" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
                         <Slider Grid.Column="1" Minimum="-10" Maximum="10"
                                 Value="{Binding TtsRate}"
@@ -262,7 +289,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Volume" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="VolumeText" Text="Volume" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
                         <Slider Grid.Column="1" Minimum="0" Maximum="100"
                                 Value="{Binding TtsVolume}"
@@ -275,11 +302,11 @@
                     </Grid>
 
                     <Grid>
-                        <CheckBox Content="Auto-speak translation"
+                        <CheckBox x:Name="AutoSpeakCheckBox" Content="Auto-speak translation"
                                   IsChecked="{Binding AutoSpeakTranslation}"
                                   Foreground="{StaticResource TextPrimaryBrush}"
                                   FontSize="13"/>
-                        <Button Content="&#x25B6; Test" HorizontalAlignment="Right"
+                        <Button x:Name="TestVoiceBtn" Content="&#x25B6; Test" HorizontalAlignment="Right"
                                 Command="{Binding TestVoiceCommand}"
                                 Style="{StaticResource AccentButton}"
                                 Background="{StaticResource BgTertiaryBrush}"
@@ -291,17 +318,39 @@
             <!-- ═══ Hotkeys ═══ -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="HOTKEYS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
+                    <TextBlock x:Name="HotkeysSectionText" Text="HOTKEYS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                Margin="0,0,0,14"/>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="HotkeyCaptureText" Text="Capture" Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center" FontSize="13"/>
+                        <TextBox Grid.Column="1" Text="{Binding CaptureHotkey, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource DarkTextBox}" FontSize="13" Padding="8,6"/>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="HotkeyCopyText" Text="Copy &amp; Translate" Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center" FontSize="13"/>
+                        <TextBox Grid.Column="1" Text="{Binding CopyTranslateHotkey, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource DarkTextBox}" FontSize="13" Padding="8,6"/>
+                    </Grid>
 
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Capture" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="HotkeyStopText" Text="Stop Speech" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
-                        <TextBox Grid.Column="1" Text="{Binding CaptureHotkey, UpdateSourceTrigger=PropertyChanged}"
+                        <TextBox Grid.Column="1" Text="{Binding StopSpeechHotkey, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource DarkTextBox}" FontSize="13" Padding="8,6"/>
                     </Grid>
                 </StackPanel>
@@ -310,10 +359,10 @@
             <!-- ═══ Mouse Gesture ═══ -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="MOUSE GESTURE" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
+                    <TextBlock x:Name="GestureSectionText" Text="MOUSE GESTURE" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                Margin="0,0,0,14"/>
 
-                    <CheckBox Content="Enable mouse gesture capture"
+                    <CheckBox x:Name="GestureEnableCheckBox" Content="Enable mouse gesture capture"
                               IsChecked="{Binding GestureEnabled}"
                               Foreground="{StaticResource TextPrimaryBrush}"
                               FontSize="13" Margin="0,0,0,12"/>
@@ -323,7 +372,7 @@
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Mouse button" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="GestureButtonText" Text="Mouse button" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
                         <ComboBox Grid.Column="1"
                                   ItemsSource="{Binding MouseButtons}"
@@ -332,7 +381,7 @@
                                   Style="{StaticResource DarkComboBox}"/>
                     </Grid>
 
-                    <TextBlock Text="Hold the mouse button and draw a circle around text to capture and translate"
+                    <TextBlock x:Name="GestureHintText" Text="Hold the mouse button and draw a circle around text to capture and translate"
                                Foreground="{StaticResource TextSecondaryBrush}"
                                FontSize="11" TextWrapping="Wrap"/>
                 </StackPanel>
@@ -341,10 +390,10 @@
             <!-- ═══ Overlay ═══ -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="OVERLAY" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
+                    <TextBlock x:Name="OverlaySectionText" Text="OVERLAY" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                Margin="0,0,0,14"/>
 
-                    <CheckBox Content="Show overlay on translate"
+                    <CheckBox x:Name="OverlayShowCheckBox" Content="Show overlay on translate"
                               IsChecked="{Binding ShowOverlayOnTranslate}"
                               Foreground="{StaticResource TextPrimaryBrush}"
                               FontSize="13" Margin="0,0,0,12"/>
@@ -355,7 +404,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Opacity" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="OpacityText" Text="Opacity" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
                         <Slider Grid.Column="1" Minimum="0.3" Maximum="1.0"
                                 Value="{Binding OverlayOpacity}"
@@ -373,7 +422,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="40"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Font size" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="FontSizeText" Text="Font size" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
                         <Slider Grid.Column="1" Minimum="10" Maximum="28"
                                 Value="{Binding OverlayFontSize}"
@@ -398,7 +447,7 @@
                            Foreground="{StaticResource TextSecondaryBrush}"
                            VerticalAlignment="Center" FontSize="12"/>
 
-                <Button Grid.Column="1" Content="Reset to Defaults"
+                <Button x:Name="ResetButton" Grid.Column="1" Content="Reset to Defaults"
                         Command="{Binding ResetCommand}"
                         Style="{StaticResource AccentButton}"
                         Background="{StaticResource BgTertiaryBrush}"

@@ -1,0 +1,148 @@
+# Screen Translator — Русский
+# Файл перевода интерфейса.
+# Версия указывает на совместимость с программой.
+# При обновлении программы используйте кнопку "Проверить переводы" в настройках.
+
+language: ru
+language_name: Русский
+version: "1.1.0"
+
+# ═══════════════════════════════════════
+# Главное окно
+# ═══════════════════════════════════════
+app.title: Screen Translator
+nav.translate: Перевод
+nav.preview: Предпросмотр
+nav.settings: Настройки
+nav.about: О программе
+tray.show: Показать
+tray.exit: Выход
+app.already_running: Screen Translator уже запущен.
+
+# ═══════════════════════════════════════
+# Страница перевода
+# ═══════════════════════════════════════
+translate.source: Источник
+translate.translation: Перевод
+translate.capture: Захват
+translate.translate: Перевести
+translate.speak_source: Озвучить исходный текст
+translate.speak_target: Озвучить перевод
+translate.ocr_engine: Движок OCR
+translate.provider: Провайдер перевода
+
+# Названия OCR-движков
+ocr.windows: Windows OCR
+ocr.tesseract: Tesseract
+
+# Статусные сообщения
+status.ready: Готово
+status.recognizing: Распознавание текста...
+status.translating: Перевод...
+status.translating_vision: Перевод изображения (vision)...
+status.speaking: Озвучивание...
+status.no_text: Текст не обнаружен
+status.no_clipboard: Нет текста в буфере обмена
+# {0} = код языка
+status.already_target: Уже на {0} — пропущено
+# {0} = сообщение об ошибке
+status.error: "Ошибка: {0}"
+status.translation_error: "Ошибка перевода: {0}"
+status.tts_error: "Ошибка озвучки: {0}"
+
+# ═══════════════════════════════════════
+# Страница предпросмотра
+# ═══════════════════════════════════════
+preview.title: Предпросмотр захвата
+preview.capture: Захватить область
+preview.no_capture: Нет захвата
+preview.hint: Нажмите «Захватить область» или Alt+A
+preview.fit: Вписать
+preview.recognizing: Распознавание...
+preview.no_text_ocr: "OCR: текст не обнаружен"
+
+# ═══════════════════════════════════════
+# Страница настроек
+# ═══════════════════════════════════════
+settings.title: Настройки
+settings.translation: ПЕРЕВОД
+settings.provider: Провайдер
+settings.ocr_engine: Движок OCR
+settings.openai_title: Настройки OpenAI Compatible
+settings.preset: Пресет
+settings.add_preset: Добавить пресет
+settings.remove_preset: Удалить пресет
+settings.name: Имя
+settings.endpoint: Эндпоинт
+settings.api_key: API-ключ
+settings.model: Модель
+settings.fetch_models: Получить список моделей
+settings.system_prompt: "Системный промпт (опционально, подстановки {source}/{target})"
+settings.vision_mode: Vision-режим (отправить скриншот напрямую, пропустить OCR)
+settings.ollama_title: Настройки Ollama
+
+# Синтез речи
+settings.tts: СИНТЕЗ РЕЧИ
+settings.voice: Голос
+settings.speed: Скорость
+settings.volume: Громкость
+settings.auto_speak: Автоозвучка перевода
+settings.test: Тест
+
+# Горячие клавиши
+settings.hotkeys: ГОРЯЧИЕ КЛАВИШИ
+settings.hotkey_capture: Захват
+settings.hotkey_copy: Копировать и перевести
+settings.hotkey_stop: Остановить озвучку
+
+# Жест мышью
+settings.gesture: ЖЕСТ МЫШЬЮ
+settings.gesture_enable: Включить захват жестом мыши
+settings.gesture_button: Кнопка мыши
+settings.gesture_hint: Удерживайте кнопку мыши и обведите текст кругом для захвата и перевода
+
+# Оверлей
+settings.overlay: ОВЕРЛЕЙ
+settings.overlay_show: Показывать оверлей при переводе
+settings.opacity: Прозрачность
+settings.font_size: Размер шрифта
+
+# Язык и действия
+settings.language: ЯЗЫК
+settings.interface_lang: Язык интерфейса
+settings.validate: Проверить переводы
+settings.reset: Сбросить настройки
+settings.saved: Сохранено
+
+# ═══════════════════════════════════════
+# О программе
+# ═══════════════════════════════════════
+about.title: О программе
+about.description: Приложение для захвата экрана, распознавания текста (OCR) и перевода в реальном времени.
+about.build_time: Время сборки
+about.runtime: Среда выполнения
+about.platform: Платформа
+about.technology: ТЕХНОЛОГИИ
+about.hotkeys: ГОРЯЧИЕ КЛАВИШИ
+about.hotkey_capture: Захват области экрана и перевод
+about.hotkey_copy: Копировать выделенный текст и перевести
+about.hotkey_stop: Остановить озвучку
+about.gesture: ЖЕСТ МЫШЬЮ
+about.gesture_desc: Удерживайте боковую кнопку мыши (XButton) и обведите текст на экране кругом или овалом. Выделенная область будет захвачена, распознана и переведена автоматически.
+about.gesture_config: Настроить кнопку мыши и включить/выключить можно в Настройках.
+about.footer: Персональный проект
+
+# ═══════════════════════════════════════
+# Выбор области
+# ═══════════════════════════════════════
+selector.hint: Выделите прямоугольную область. Нажмите ESC для отмены.
+
+# ═══════════════════════════════════════
+# Сообщения валидации
+# ═══════════════════════════════════════
+validation.title: Проверка перевода
+validation.ok: Все ключи переведены и актуальны.
+validation.missing: "Отсутствуют (не переведены):"
+validation.outdated: "Устаревшие (текст изменён в v{0}):"
+validation.deprecated: "Устаревшие (можно удалить):"
+validation.yaml_error: "Ошибка YAML-синтаксиса в строке {0}: {1}"

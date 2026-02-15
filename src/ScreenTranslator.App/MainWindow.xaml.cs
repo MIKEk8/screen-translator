@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -9,6 +8,8 @@ using ScreenTranslator.App.Windows;
 using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Hotkey;
 using ScreenTranslator.Core.Services.Interfaces;
+using ScreenTranslator.Core.Services.Localization;
+using Serilog;
 using Forms = System.Windows.Forms;
 using Drawing = System.Drawing;
 
@@ -16,17 +17,11 @@ namespace ScreenTranslator.App;
 
 public partial class MainWindow : Window
 {
-    [DllImport("user32.dll")]
-    private static extern short GetAsyncKeyState(int vKey);
-
-    private const int VK_A = 0x41;
-    private const int VK_MENU = 0x12; // Alt
-    private const int LongPressMs = 2000;
-
     private readonly IConfigService _configService;
     private readonly IScreenshotService _screenshotService;
     private readonly GlobalHotkeyService _hotkeyService;
     private readonly ITtsService _ttsService;
+    private readonly ILocalizationService _loc;
 
     private TranslatePage? _translatePage;
     private PreviewPage? _previewPage;
@@ -51,14 +46,33 @@ public partial class MainWindow : Window
         _screenshotService = App.Services.GetRequiredService<IScreenshotService>();
         _hotkeyService = App.Services.GetRequiredService<GlobalHotkeyService>();
         _ttsService = App.Services.GetRequiredService<ITtsService>();
+        _loc = App.Services.GetRequiredService<ILocalizationService>();
 
         InitializeTrayIcon();
+        ApplyTranslations();
+        _loc.LanguageChanged += _ => Dispatcher.Invoke(ApplyTranslations);
 
         // Cleanup tray icon on abnormal exit
         AppDomain.CurrentDomain.ProcessExit += (_, _) => CleanupTrayIcon();
         AppDomain.CurrentDomain.UnhandledException += (_, _) => CleanupTrayIcon();
 
         Loaded += MainWindow_Loaded;
+    }
+
+    private void ApplyTranslations()
+    {
+        Title = _loc.T("app.title");
+        NavTranslate.ToolTip = _loc.T("nav.translate");
+        NavPreview.ToolTip = _loc.T("nav.preview");
+        NavSettings.ToolTip = _loc.T("nav.settings");
+        NavAbout.ToolTip = _loc.T("nav.about");
+
+        // Update tray menu
+        if (_trayIcon?.ContextMenuStrip is { } menu)
+        {
+            menu.Items[0].Text = _loc.T("tray.show");
+            menu.Items[2].Text = _loc.T("tray.exit");
+        }
     }
 
     private void InitializeTrayIcon()
@@ -165,6 +179,9 @@ public partial class MainWindow : Window
     private void OnGestureCompleted(ScreenRegion region)
     {
         _gestureTrailWindow?.HideTrail();
+        FeedbackSound.Play();
+
+        Log.Information("Gesture completed: {Region}", region);
 
         _translatePage ??= new TranslatePage();
         NavigateTo("translate");
@@ -189,41 +206,10 @@ public partial class MainWindow : Window
         return IntPtr.Zero;
     }
 
-    private async void HandleCaptureHotkey()
+    private void HandleCaptureHotkey()
     {
         _translatePage ??= new TranslatePage();
-
-        // If no previous region, go straight to area selector
-        if (!_translatePage.HasLastRegion)
-        {
-            _translatePage.StartAreaCapture();
-            return;
-        }
-
-        // Poll key state: if user holds Alt+A for 2 seconds → reuse last region
-        var elapsed = 0;
-        const int pollInterval = 50;
-
-        while (elapsed < LongPressMs)
-        {
-            await Task.Delay(pollInterval);
-            elapsed += pollInterval;
-
-            // Check if both Alt and A are still held down (high bit set = key is down)
-            bool altHeld = (GetAsyncKeyState(VK_MENU) & 0x8000) != 0;
-            bool aHeld = (GetAsyncKeyState(VK_A) & 0x8000) != 0;
-
-            if (!altHeld || !aHeld)
-            {
-                // Released early → open area selector (short press)
-                _translatePage.StartAreaCapture();
-                return;
-            }
-        }
-
-        // Held for 2 seconds → reuse previous region
-        NavigateTo("translate");
-        _translatePage.CaptureFromLastRegion();
+        _translatePage.StartAreaCapture();
     }
 
     private void NavigateTo(string page)

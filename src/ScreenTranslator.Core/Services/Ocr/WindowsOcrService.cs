@@ -18,8 +18,10 @@ public class WindowsOcrService : IOcrService
     {
         var engine = CreateEngine(language);
 
+        var processed = ImagePreprocessor.PreprocessForWindowsOcr(imageData);
+
         using var stream = new InMemoryRandomAccessStream();
-        await stream.WriteAsync(imageData.AsBuffer());
+        await stream.WriteAsync(processed.AsBuffer());
         stream.Seek(0);
 
         var decoder = await BitmapDecoder.CreateAsync(stream);

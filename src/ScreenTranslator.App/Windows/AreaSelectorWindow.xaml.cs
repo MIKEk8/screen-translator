@@ -3,7 +3,9 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Microsoft.Extensions.DependencyInjection;
 using ScreenTranslator.Core.Models;
+using ScreenTranslator.Core.Services.Localization;
 using ScreenTranslator.Core.Services.Screenshot;
 
 namespace ScreenTranslator.App.Windows;
@@ -21,6 +23,9 @@ public partial class AreaSelectorWindow : Window
     public AreaSelectorWindow()
     {
         InitializeComponent();
+
+        var loc = App.Services.GetRequiredService<ILocalizationService>();
+        InstructionText.Text = loc.T("selector.hint");
 
         var monitorService = new MultiMonitorService();
         _bounds = monitorService.GetVirtualDesktopBounds(); // physical pixels

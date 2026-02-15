@@ -1,12 +1,17 @@
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
 using ScreenTranslator.App.Windows;
 using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Interfaces;
+using ScreenTranslator.Core.Services.Localization;
+using ScreenTranslator.Core.Services.Translation;
+using Serilog;
 
 namespace ScreenTranslator.App.Pages;
 
@@ -25,13 +30,21 @@ public partial class TranslatePage : Page
     private readonly IScreenshotService _screenshotService;
     private readonly IConfigService _configService;
     private readonly ITtsService _ttsService;
-
-    private ScreenRegion? _lastRegion;
+    private readonly ILocalizationService _loc;
 
     private bool _isLoading;
 
     private record ProviderOption(string Label, TranslationProvider Provider, string? PresetName = null)
     {
+        public override string ToString() => Label;
+    }
+
+    /// <summary>
+    /// OCR option: WindowsOcr, Tesseract, or a vision preset (PresetName set).
+    /// </summary>
+    private record OcrOption(string Label, OcrEngine Engine, string? PresetName = null)
+    {
+        public bool IsVision => PresetName is not null;
         public override string ToString() => Label;
     }
 
@@ -44,6 +57,7 @@ public partial class TranslatePage : Page
         _screenshotService = App.Services.GetRequiredService<IScreenshotService>();
         _configService = App.Services.GetRequiredService<IConfigService>();
         _ttsService = App.Services.GetRequiredService<ITtsService>();
+        _loc = App.Services.GetRequiredService<ILocalizationService>();
 
         var langCodes = SupportedLanguages.All.Select(l => l.Code.ToUpperInvariant()).ToList();
         SourceLangCombo.ItemsSource = langCodes;
@@ -51,14 +65,74 @@ public partial class TranslatePage : Page
 
         Loaded += (_, _) =>
         {
+            ApplyTranslations();
             SyncLanguageCombos();
+            RebuildOcrCombo();
             RebuildProviderCombo();
         };
         _configService.ConfigChanged += _ => Dispatcher.Invoke(() =>
         {
             SyncLanguageCombos();
+            RebuildOcrCombo();
             RebuildProviderCombo();
         });
+        _loc.LanguageChanged += _ => Dispatcher.Invoke(() =>
+        {
+            ApplyTranslations();
+            RebuildOcrCombo();
+            RebuildProviderCombo();
+        });
+    }
+
+    private void ApplyTranslations()
+    {
+        SourceLabel.Text = _loc.T("translate.source");
+        TranslationLabel.Text = _loc.T("translate.translation");
+        CaptureButton.Content = $"\U0001F4F7 {_loc.T("translate.capture")}";
+        TranslateButton.Content = _loc.T("translate.translate");
+        SpeakSourceButton.ToolTip = _loc.T("translate.speak_source");
+        SpeakTargetButton.ToolTip = _loc.T("translate.speak_target");
+        OcrCombo.ToolTip = _loc.T("translate.ocr_engine");
+        ProviderCombo.ToolTip = _loc.T("translate.provider");
+        if (StatusText.Text == "Ready" || StatusText.Text == _loc.T("status.ready"))
+            StatusText.Text = _loc.T("status.ready");
+    }
+
+    private void RebuildOcrCombo()
+    {
+        _isLoading = true;
+
+        var items = new List<OcrOption>
+        {
+            new(_loc.T("ocr.windows"), OcrEngine.WindowsOcr),
+            new(_loc.T("ocr.tesseract"), OcrEngine.Tesseract),
+        };
+        foreach (var preset in _configService.Config.OpenAiPresets.Where(p => p.UseVision))
+            items.Add(new(preset.Name, OcrEngine.Vision, preset.Name));
+
+        OcrCombo.ItemsSource = items;
+
+        var cfg = _configService.Config;
+        if (cfg.OcrEngine == OcrEngine.Vision)
+        {
+            OcrCombo.SelectedItem = items.FirstOrDefault(i => i.PresetName == cfg.ActiveOcrPreset)
+                                    ?? items.FirstOrDefault(i => i.IsVision);
+        }
+        else
+        {
+            OcrCombo.SelectedItem = items.FirstOrDefault(i => i.Engine == cfg.OcrEngine && !i.IsVision);
+        }
+
+        _isLoading = false;
+    }
+
+    private async void OcrCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isLoading || OcrCombo.SelectedItem is not OcrOption opt) return;
+        _configService.Config.OcrEngine = opt.Engine;
+        if (opt.PresetName is not null)
+            _configService.Config.ActiveOcrPreset = opt.PresetName;
+        await _configService.SaveAsync();
     }
 
     private void RebuildProviderCombo()
@@ -113,7 +187,6 @@ public partial class TranslatePage : Page
 
         if (result == true && selector.SelectedRegion is { } region)
         {
-            _lastRegion = region;
             // Capture BEFORE restoring main window
             var screenshot = _screenshotService.CaptureRegion(region);
             mainWindow.WindowState = prevState;
@@ -130,16 +203,20 @@ public partial class TranslatePage : Page
         try
         {
             var config = _configService.Config;
-            var useVision = config.TranslationProvider == TranslationProvider.OpenAiCompatible
-                            && config.GetActivePreset().UseVision;
 
-            if (useVision)
+            if (config.OcrEngine == OcrEngine.Vision)
             {
-                StatusText.Text = "Translating image (vision)...";
-                SourceTextBox.Text = "[vision mode — OCR skipped]";
+                StatusText.Text = _loc.T("status.translating_vision");
+                ShowSourceImage(screenshot.ImageData);
 
+                // Use the vision preset selected in OCR combo
+                var visionPreset = config.OpenAiPresets
+                    .FirstOrDefault(p => p.Name == config.ActiveOcrPreset && p.UseVision)
+                    ?? throw new InvalidOperationException("Vision preset not found");
+
+                var visionService = new OpenAiTranslationService(visionPreset);
                 var sw = Stopwatch.StartNew();
-                var result = await _translationService.TranslateImageAsync(
+                var result = await visionService.TranslateImageAsync(
                     screenshot.ImageData,
                     config.SourceLanguage,
                     config.TargetLanguage);
@@ -157,7 +234,8 @@ public partial class TranslatePage : Page
             }
             else
             {
-                StatusText.Text = "Recognizing text...";
+                ShowSourceText();
+                StatusText.Text = _loc.T("status.recognizing");
                 var ocrResult = await _ocrService.RecognizeAsync(
                     screenshot.ImageData,
                     config.SourceLanguage);
@@ -171,13 +249,14 @@ public partial class TranslatePage : Page
                 }
                 else
                 {
-                    StatusText.Text = "No text detected";
+                    StatusText.Text = _loc.T("status.no_text");
                 }
             }
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Error: {ex.Message}";
+            Log.Error(ex, "OCR/translate failed");
+            StatusText.Text = _loc.T("status.error", ex.Message);
         }
     }
 
@@ -190,13 +269,13 @@ public partial class TranslatePage : Page
         if (detected is not null && detected == targetLang)
         {
             TargetTextBox.Text = text;
-            StatusText.Text = $"Already in {targetLang.ToUpperInvariant()} — skipped";
+            StatusText.Text = _loc.T("status.already_target", targetLang.ToUpperInvariant());
             if (_configService.Config.Tts.AutoSpeakTranslation)
                 _ = SpeakText(text);
             return;
         }
 
-        StatusText.Text = "Translating...";
+        StatusText.Text = _loc.T("status.translating");
         try
         {
             var sw = Stopwatch.StartNew();
@@ -218,7 +297,8 @@ public partial class TranslatePage : Page
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Translation error: {ex.Message}";
+            Log.Error(ex, "Translation failed");
+            StatusText.Text = _loc.T("status.translation_error", ex.Message);
         }
     }
 
@@ -297,45 +377,44 @@ public partial class TranslatePage : Page
             var text = Clipboard.GetText();
             if (string.IsNullOrWhiteSpace(text))
             {
-                StatusText.Text = "No text in clipboard";
+                StatusText.Text = _loc.T("status.no_clipboard");
                 return;
             }
 
             SourceTextBox.Text = text;
-            StatusText.Text = "Translating...";
+            StatusText.Text = _loc.T("status.translating");
             await TranslateText(text);
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"Error: {ex.Message}";
+            Log.Error(ex, "Copy & translate failed");
+            StatusText.Text = _loc.T("status.error", ex.Message);
         }
-    }
-
-    public bool HasLastRegion => _lastRegion is not null;
-
-    public async void CaptureFromLastRegion()
-    {
-        if (_lastRegion is null)
-        {
-            StartAreaCapture();
-            return;
-        }
-
-        var mainWindow = Application.Current.MainWindow;
-        if (mainWindow is null) return;
-
-        var prevState = mainWindow.WindowState;
-        mainWindow.WindowState = WindowState.Minimized;
-        await Task.Delay(200);
-
-        var screenshot = _screenshotService.CaptureRegion(_lastRegion);
-        mainWindow.WindowState = prevState;
-        await OcrAndTranslate(screenshot);
     }
 
     public async void ProcessScreenshot(ScreenshotResult screenshot)
     {
         await OcrAndTranslate(screenshot);
+    }
+
+    private void ShowSourceImage(byte[] imageData)
+    {
+        var bitmapImage = new BitmapImage();
+        bitmapImage.BeginInit();
+        bitmapImage.StreamSource = new MemoryStream(imageData);
+        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+        bitmapImage.EndInit();
+        bitmapImage.Freeze();
+
+        SourceImage.Source = bitmapImage;
+        SourceImage.Visibility = Visibility.Visible;
+        SourceTextBox.Visibility = Visibility.Collapsed;
+    }
+
+    private void ShowSourceText()
+    {
+        SourceImage.Visibility = Visibility.Collapsed;
+        SourceTextBox.Visibility = Visibility.Visible;
     }
 
     private void CaptureButton_Click(object sender, RoutedEventArgs e) => StartAreaCapture();
@@ -364,17 +443,18 @@ public partial class TranslatePage : Page
 
         try
         {
-            StatusText.Text = "Speaking...";
+            StatusText.Text = _loc.T("status.speaking");
             await _ttsService.SpeakAsync(StripEmoji(text));
-            StatusText.Text = "Ready";
+            StatusText.Text = _loc.T("status.ready");
         }
         catch (OperationCanceledException)
         {
-            StatusText.Text = "Ready";
+            StatusText.Text = _loc.T("status.ready");
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"TTS error: {ex.Message}";
+            Log.Error(ex, "TTS failed");
+            StatusText.Text = _loc.T("status.tts_error", ex.Message);
         }
     }
 

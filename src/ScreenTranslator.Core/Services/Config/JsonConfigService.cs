@@ -30,11 +30,11 @@ public class JsonConfigService : IConfigService
     {
         if (!File.Exists(_configPath))
         {
-            await SaveAsync();
+            await SaveAsync().ConfigureAwait(false);
             return;
         }
 
-        var json = await File.ReadAllTextAsync(_configPath);
+        var json = await File.ReadAllTextAsync(_configPath).ConfigureAwait(false);
         try
         {
             Config = JsonSerializer.Deserialize<AppConfig>(json, JsonOptions) ?? new AppConfig();
@@ -45,7 +45,7 @@ public class JsonConfigService : IConfigService
             // Note: invalid enum values (e.g. removed members) are handled gracefully
             // by TolerantEnumConverter which returns default instead of throwing.
             Config = new AppConfig();
-            await SaveAsync();
+            await SaveAsync().ConfigureAwait(false);
         }
         ConfigChanged?.Invoke(Config);
     }
@@ -57,7 +57,7 @@ public class JsonConfigService : IConfigService
             Directory.CreateDirectory(dir);
 
         var json = JsonSerializer.Serialize(Config, JsonOptions);
-        await File.WriteAllTextAsync(_configPath, json);
+        await File.WriteAllTextAsync(_configPath, json).ConfigureAwait(false);
         ConfigChanged?.Invoke(Config);
     }
 }

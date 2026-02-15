@@ -1,0 +1,151 @@
+# Screen Translator — English (default)
+# This is the reference translation file.
+# To create a new translation, copy this file, rename to your language code (e.g. fr.yaml),
+# and translate all values below.
+
+language: en
+language_name: English
+version: "1.1.0"
+
+# ═══════════════════════════════════════
+# Main window
+# ═══════════════════════════════════════
+app.title: Screen Translator
+nav.translate: Translate
+nav.preview: Capture Preview
+nav.settings: Settings
+nav.about: About
+tray.show: Show
+tray.exit: Exit
+app.already_running: Screen Translator is already running.
+
+# ═══════════════════════════════════════
+# Translate page
+# ═══════════════════════════════════════
+translate.source: Source
+translate.translation: Translation
+translate.capture: Capture
+translate.translate: Translate
+translate.speak_source: Speak source text
+translate.speak_target: Speak translation
+translate.ocr_engine: OCR engine
+translate.provider: Translation provider
+
+# OCR engine names
+ocr.windows: Windows OCR
+ocr.tesseract: Tesseract
+
+# Status messages
+status.ready: Ready
+status.recognizing: Recognizing text...
+status.translating: Translating...
+status.translating_vision: Translating image (vision)...
+status.speaking: Speaking...
+status.no_text: No text detected
+status.no_clipboard: No text in clipboard
+# {0} = language code
+status.already_target: Already in {0} — skipped
+# {0} = error message
+status.error: "Error: {0}"
+status.translation_error: "Translation error: {0}"
+status.tts_error: "TTS error: {0}"
+
+# ═══════════════════════════════════════
+# Preview page
+# ═══════════════════════════════════════
+preview.title: Capture Preview
+preview.capture: Capture Area
+preview.no_capture: No capture yet
+preview.hint: Click 'Capture Area' or press Alt+A
+preview.fit: Fit
+preview.recognizing: Recognizing...
+preview.no_text_ocr: "OCR: no text detected"
+
+# ═══════════════════════════════════════
+# Settings page
+# ═══════════════════════════════════════
+settings.title: Settings
+settings.translation: TRANSLATION
+settings.provider: Provider
+settings.ocr_engine: OCR Engine
+settings.openai_title: OpenAI Compatible Settings
+settings.preset: Preset
+settings.add_preset: Add preset
+settings.remove_preset: Remove preset
+settings.name: Name
+settings.endpoint: Endpoint
+settings.api_key: API Key
+settings.model: Model
+settings.fetch_models: Fetch models from API
+settings.system_prompt: "System Prompt (optional, {source}/{target} placeholders)"
+settings.vision_mode: Vision mode (send screenshot directly, skip OCR)
+settings.ollama_title: Ollama Settings
+
+# Text-to-Speech
+settings.tts: TEXT-TO-SPEECH
+settings.voice: Voice
+settings.speed: Speed
+settings.volume: Volume
+settings.auto_speak: Auto-speak translation
+settings.test: Test
+
+# Hotkeys
+settings.hotkeys: HOTKEYS
+settings.hotkey_capture: Capture
+settings.hotkey_copy: Copy & Translate
+settings.hotkey_stop: Stop Speech
+
+# Mouse gesture
+settings.gesture: MOUSE GESTURE
+settings.gesture_enable: Enable mouse gesture capture
+settings.gesture_button: Mouse button
+settings.gesture_hint: Hold the mouse button and draw a circle around text to capture and translate
+
+# Overlay
+settings.overlay: OVERLAY
+settings.overlay_show: Show overlay on translate
+settings.opacity: Opacity
+settings.font_size: Font size
+
+# Language & actions
+settings.language: LANGUAGE
+settings.interface_lang: Interface language
+settings.validate: Validate translations
+settings.reset: Reset to Defaults
+settings.saved: Saved
+
+# ═══════════════════════════════════════
+# About page
+# ═══════════════════════════════════════
+about.title: About
+about.description: Desktop app for screen capture, OCR text recognition, and real-time translation.
+about.build_time: Build time
+about.runtime: Runtime
+about.platform: Platform
+about.technology: TECHNOLOGY
+about.hotkeys: HOTKEYS
+about.hotkey_capture: Capture screen area and translate
+about.hotkey_copy: Copy selected text and translate
+about.hotkey_stop: Stop speech
+about.gesture: MOUSE GESTURE
+about.gesture_desc: Hold a mouse side button (XButton) and draw a circle or oval around text on screen. The enclosed area will be captured, recognized, and translated automatically.
+about.gesture_config: Configure the mouse button and enable/disable in Settings.
+about.footer: Personal project
+
+# ═══════════════════════════════════════
+# Area selector
+# ═══════════════════════════════════════
+selector.hint: Draw a rectangle to select area. Press ESC to cancel.
+
+# ═══════════════════════════════════════
+# Validation messages
+# ═══════════════════════════════════════
+validation.title: Translation Validation
+validation.ok: All keys are translated and up to date.
+# {0} = count
+validation.missing: "Missing (not translated):"
+# {0} = version
+validation.outdated: "Outdated (text changed in v{0}):"
+validation.deprecated: "Deprecated (can be removed):"
+# {0} = line, {1} = error message
+validation.yaml_error: "YAML syntax error at line {0}: {1}"

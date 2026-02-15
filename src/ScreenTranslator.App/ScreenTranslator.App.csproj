@@ -6,6 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="Serilog" Version="4.2.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -17,7 +19,7 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
 
@@ -26,10 +28,24 @@
     <Resource Include="feedback.wav" />
   </ItemGroup>
 
+  <!-- Copy translation files to output -->
+  <ItemGroup>
+    <None Include="translations\*.yaml" CopyToOutputDirectory="PreserveNewest" LinkBase="translations" />
+  </ItemGroup>
+
   <!-- Exclude WinForms global usings to avoid ambiguity with WPF types -->
   <ItemGroup>
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <!-- Protect reflection-heavy assemblies when trimming (dotnet publish -p:PublishTrimmed=true) -->
+  <ItemGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <TrimmerRootAssembly Include="System.Speech" />
+    <TrimmerRootAssembly Include="System.Drawing.Common" />
+    <TrimmerRootAssembly Include="YamlDotNet" />
+    <TrimmerRootAssembly Include="Microsoft.Extensions.DependencyInjection" />
+    <TrimmerRootAssembly Include="CommunityToolkit.Mvvm" />
   </ItemGroup>
 
 </Project>

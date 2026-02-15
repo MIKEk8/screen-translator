@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ScreenTranslator.App.Windows;
 using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Interfaces;
+using ScreenTranslator.Core.Services.Localization;
 
 namespace ScreenTranslator.App.Pages;
 
@@ -16,6 +17,7 @@ public partial class PreviewPage : Page
     private readonly IScreenshotService _screenshotService;
     private readonly IOcrService _ocrService;
     private readonly IConfigService _configService;
+    private readonly ILocalizationService _loc;
     private double _zoomLevel = 1.0;
 
     public PreviewPage()
@@ -25,6 +27,19 @@ public partial class PreviewPage : Page
         _screenshotService = App.Services.GetRequiredService<IScreenshotService>();
         _ocrService = App.Services.GetRequiredService<IOcrService>();
         _configService = App.Services.GetRequiredService<IConfigService>();
+        _loc = App.Services.GetRequiredService<ILocalizationService>();
+
+        ApplyTranslations();
+        _loc.LanguageChanged += _ => Dispatcher.Invoke(ApplyTranslations);
+    }
+
+    private void ApplyTranslations()
+    {
+        PreviewTitleText.Text = _loc.T("preview.title");
+        CaptureBtn.Content = $"\U0001F4F7  {_loc.T("preview.capture")}";
+        NoCaptureText.Text = _loc.T("preview.no_capture");
+        CaptureHintText.Text = _loc.T("preview.hint");
+        FitBtn.Content = _loc.T("preview.fit");
     }
 
     public async void CaptureAndPreview()
@@ -78,14 +93,14 @@ public partial class PreviewPage : Page
             UpdateZoomText();
 
             // Run OCR
-            OcrResultText.Text = "Recognizing...";
+            OcrResultText.Text = _loc.T("preview.recognizing");
             var ocrResult = await _ocrService.RecognizeAsync(
                 screenshot.ImageData,
                 _configService.Config.SourceLanguage);
 
             if (string.IsNullOrWhiteSpace(ocrResult.Text))
             {
-                OcrResultText.Text = "OCR: no text detected";
+                OcrResultText.Text = _loc.T("preview.no_text_ocr");
             }
             else
             {
@@ -131,7 +146,7 @@ public partial class PreviewPage : Page
     private void UpdateZoomText()
     {
         ZoomText.Text = PreviewImage.Stretch == Stretch.Uniform
-            ? "Fit"
+            ? _loc.T("preview.fit")
             : $"{_zoomLevel:P0}";
     }
 

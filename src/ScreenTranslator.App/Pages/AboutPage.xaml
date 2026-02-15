@@ -6,7 +6,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="24,16">
         <StackPanel MaxWidth="640">
 
-            <TextBlock Text="About" FontSize="22" FontWeight="Bold"
+            <TextBlock x:Name="AboutTitleText" Text="About" FontSize="22" FontWeight="Bold"
                        Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,24"/>
 
             <!-- App Info -->
@@ -23,7 +23,7 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock Text="Desktop app for screen capture, OCR text recognition, and real-time translation."
+                    <TextBlock x:Name="DescriptionText" Text="Desktop app for screen capture, OCR text recognition, and real-time translation."
                                Foreground="{StaticResource TextSecondaryBrush}" FontSize="13"
                                TextWrapping="Wrap" Margin="0,0,0,16"/>
 
@@ -32,7 +32,7 @@
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Build time" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock x:Name="BuildTimeLbl" Text="Build time" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                         <TextBlock x:Name="BuildTimeText" Grid.Column="1"
                                    Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"/>
                     </Grid>
@@ -42,7 +42,7 @@
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Runtime" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock x:Name="RuntimeLbl" Text="Runtime" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                         <TextBlock x:Name="RuntimeText" Grid.Column="1"
                                    Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"/>
                     </Grid>
@@ -52,7 +52,7 @@
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Platform" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                        <TextBlock x:Name="PlatformLbl" Text="Platform" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                         <TextBlock x:Name="PlatformText" Grid.Column="1"
                                    Foreground="{StaticResource TextPrimaryBrush}" FontSize="12"/>
                     </Grid>
@@ -62,7 +62,7 @@
             <!-- Stack -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="TECHNOLOGY" FontSize="11" FontWeight="Bold"
+                    <TextBlock x:Name="TechSectionText" Text="TECHNOLOGY" FontSize="11" FontWeight="Bold"
                                Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
 
                     <TextBlock Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap">
@@ -70,10 +70,10 @@
                         <Run>WPF (.NET 9, C#)</Run>
                         <LineBreak/>
                         <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">OCR:</Run>
-                        <Run>Windows.Media.Ocr (WinRT)</Run>
+                        <Run>Windows.Media.Ocr (WinRT), Tesseract, Vision (LLM)</Run>
                         <LineBreak/>
                         <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">Translation:</Run>
-                        <Run>Google, DeepL, OpenAI-compatible</Run>
+                        <Run>Google, OpenAI-compatible, Ollama</Run>
                         <LineBreak/>
                         <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">TTS:</Run>
                         <Run>SAPI5 (System.Speech)</Run>
@@ -87,7 +87,7 @@
             <!-- Hotkeys Reference -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="HOTKEYS" FontSize="11" FontWeight="Bold"
+                    <TextBlock x:Name="HotkeysSectionText" Text="HOTKEYS" FontSize="11" FontWeight="Bold"
                                Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
 
                     <Grid Margin="0,0,0,4">
@@ -96,7 +96,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Alt+A" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
-                        <TextBlock Grid.Column="1" Text="Capture screen area (hold 2s to reuse last region)"
+                        <TextBlock x:Name="HotkeyCaptureLbl" Grid.Column="1" Text="Capture screen area and translate"
                                    Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                     </Grid>
                     <Grid Margin="0,0,0,4">
@@ -105,7 +105,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Alt+C" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
-                        <TextBlock Grid.Column="1" Text="Copy selected text and translate"
+                        <TextBlock x:Name="HotkeyCopyLbl" Grid.Column="1" Text="Copy selected text and translate"
                                    Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                     </Grid>
                     <Grid>
@@ -114,14 +114,27 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Alt+X" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
-                        <TextBlock Grid.Column="1" Text="Stop speech"
+                        <TextBlock x:Name="HotkeyStopLbl" Grid.Column="1" Text="Stop speech"
                                    Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                     </Grid>
                 </StackPanel>
             </Border>
 
+            <!-- Mouse Gesture -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock x:Name="GestureSectionText" Text="MOUSE GESTURE" FontSize="11" FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
+
+                    <TextBlock x:Name="GestureDescText" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                               Text="Hold a mouse side button (XButton) and draw a circle or oval around text on screen. The enclosed area will be captured, recognized, and translated automatically."/>
+                    <TextBlock x:Name="GestureConfigText" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                               Text="Configure the mouse button and enable/disable in Settings." Margin="0,8,0,0"/>
+                </StackPanel>
+            </Border>
+
             <!-- Author -->
-            <TextBlock Text="Personal project" FontSize="11"
+            <TextBlock x:Name="FooterText" Text="Personal project" FontSize="11"
                        Foreground="{StaticResource TextSecondaryBrush}"
                        HorizontalAlignment="Center" Margin="0,0,0,24"/>
 

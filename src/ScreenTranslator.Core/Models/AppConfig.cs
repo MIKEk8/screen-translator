@@ -43,21 +43,25 @@ public class AppConfig
     public OllamaConfig Ollama { get; set; } = new();
     public List<OpenAiPreset> OpenAiPresets { get; set; } = [new()];
     public string ActiveOpenAiPreset { get; set; } = "Default";
+    public string ActiveOcrPreset { get; set; } = "";
     public TtsConfig Tts { get; set; } = new();
     public GestureConfig Gesture { get; set; } = new();
+    public TesseractOcrConfig TesseractOcr { get; set; } = new();
 
     public OpenAiPreset GetActivePreset() =>
         OpenAiPresets.FirstOrDefault(p => p.Name == ActiveOpenAiPreset)
         ?? OpenAiPresets.FirstOrDefault()
         ?? new();
     public bool AutoDetectLanguage { get; set; } = true;
+    public string InterfaceLanguage { get; set; } = "auto";
 }
 
 [JsonConverter(typeof(TolerantEnumConverter<OcrEngine>))]
 public enum OcrEngine
 {
     WindowsOcr,
-    Tesseract
+    Tesseract,
+    Vision
 }
 
 [JsonConverter(typeof(TolerantEnumConverter<TranslationProvider>))]
@@ -112,6 +116,11 @@ public class GestureConfig
 {
     public bool Enabled { get; set; }
     public int MouseButton { get; set; } = 2; // 1=XButton1(back), 2=XButton2(forward)
+}
+
+public class TesseractOcrConfig
+{
+    public string TessdataPath { get; set; } = "tessdata";
 }
 
 public static class SupportedLanguages

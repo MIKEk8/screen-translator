@@ -1,10 +1,13 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Net.Http;
 using System.Text.Json;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Interfaces;
+using ScreenTranslator.Core.Services.Localization;
 
 namespace ScreenTranslator.App.ViewModels;
 
@@ -12,6 +15,7 @@ public partial class SettingsViewModel : ObservableObject
 {
     private readonly IConfigService _configService;
     private readonly ITtsService _ttsService;
+    private readonly ILocalizationService _locService;
 
     public IReadOnlyList<TranslationProvider> Providers { get; } = Enum.GetValues<TranslationProvider>();
     public IReadOnlyList<OcrEngine> OcrEngines { get; } = Enum.GetValues<OcrEngine>();
@@ -30,6 +34,12 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private string _captureHotkey = "Alt+A";
+
+    [ObservableProperty]
+    private string _copyTranslateHotkey = "Alt+C";
+
+    [ObservableProperty]
+    private string _stopSpeechHotkey = "Alt+X";
 
     [ObservableProperty]
     private double _overlayOpacity;
@@ -120,15 +130,31 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = "";
 
+    // ── Language ──
+    public ObservableCollection<LanguageOption> AvailableInterfaceLanguages { get; } = [];
+
+    [ObservableProperty]
+    private LanguageOption? _selectedInterfaceLanguage;
+
     private bool _isLoading;
     private CancellationTokenSource? _autoSaveCts;
 
-    public SettingsViewModel(IConfigService configService, ITtsService ttsService)
+    public SettingsViewModel(IConfigService configService, ITtsService ttsService, ILocalizationService locService)
     {
         _configService = configService;
         _ttsService = ttsService;
+        _locService = locService;
         AvailableVoices = ttsService.GetAvailableVoices();
+        LoadLanguages();
         LoadFromConfig();
+    }
+
+    private void LoadLanguages()
+    {
+        AvailableInterfaceLanguages.Clear();
+        AvailableInterfaceLanguages.Add(new LanguageOption("auto", "Auto (system)"));
+        foreach (var lang in _locService.GetAvailableLanguages())
+            AvailableInterfaceLanguages.Add(new LanguageOption(lang.Code, $"{lang.Name} ({lang.Code}) v{lang.Version}"));
     }
 
     private void LoadFromConfig()
@@ -139,6 +165,8 @@ public partial class SettingsViewModel : ObservableObject
         SelectedProvider = cfg.TranslationProvider;
         SelectedOcrEngine = cfg.OcrEngine;
         CaptureHotkey = cfg.Hotkey.CaptureKey;
+        CopyTranslateHotkey = cfg.Hotkey.CopyTranslateKey;
+        StopSpeechHotkey = cfg.Hotkey.StopSpeechKey;
         OverlayOpacity = cfg.Overlay.Opacity;
         OverlayFontSize = cfg.Overlay.FontSize;
         ShowOverlayOnTranslate = cfg.Overlay.ShowOnTranslate;
@@ -157,6 +185,11 @@ public partial class SettingsViewModel : ObservableObject
 
         GestureEnabled = cfg.Gesture.Enabled;
         GestureMouseButton = cfg.Gesture.MouseButton;
+
+        // Language
+        var langCode = cfg.InterfaceLanguage;
+        SelectedInterfaceLanguage = AvailableInterfaceLanguages.FirstOrDefault(l => l.Code == langCode)
+            ?? AvailableInterfaceLanguages.FirstOrDefault();
 
         _isLoading = false;
     }
@@ -338,6 +371,8 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnSelectedProviderChanged(TranslationProvider value) => ScheduleAutoSave();
     partial void OnSelectedOcrEngineChanged(OcrEngine value) => ScheduleAutoSave();
     partial void OnCaptureHotkeyChanged(string value) => ScheduleAutoSave();
+    partial void OnCopyTranslateHotkeyChanged(string value) => ScheduleAutoSave();
+    partial void OnStopSpeechHotkeyChanged(string value) => ScheduleAutoSave();
     partial void OnOverlayOpacityChanged(double value) => ScheduleAutoSave();
     partial void OnOverlayFontSizeChanged(int value) => ScheduleAutoSave();
     partial void OnShowOverlayOnTranslateChanged(bool value) => ScheduleAutoSave();
@@ -355,6 +390,72 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnGestureEnabledChanged(bool value) => ScheduleAutoSave();
     partial void OnGestureMouseButtonChanged(int value) => ScheduleAutoSave();
 
+    partial void OnSelectedInterfaceLanguageChanged(LanguageOption? value)
+    {
+        if (_isLoading || value is null) return;
+        _configService.Config.InterfaceLanguage = value.Code;
+        var lang = value.Code == "auto"
+            ? _locService.DetectSystemLanguage()
+            : value.Code;
+        _locService.SetLanguage(lang);
+        ScheduleAutoSave();
+    }
+
+    [RelayCommand]
+    private void ValidateTranslations()
+    {
+        var yamlPath = Path.Combine(AppContext.BaseDirectory, "translations", $"{_locService.CurrentLanguage}.yaml");
+        if (!File.Exists(yamlPath))
+        {
+            MessageBox.Show(
+                $"No translation file found for '{_locService.CurrentLanguage}'.\nUsing built-in English defaults.",
+                _locService.T("validation.title"),
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var result = LocalizationValidator.Validate(yamlPath);
+
+        if (result.YamlError is not null)
+        {
+            MessageBox.Show(result.YamlError, _locService.T("validation.title"),
+                MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        if (result.IsValid)
+        {
+            MessageBox.Show(_locService.T("validation.ok"), _locService.T("validation.title"),
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        var sb = new System.Text.StringBuilder();
+        if (result.Missing.Count > 0)
+        {
+            sb.AppendLine(_locService.T("validation.missing"));
+            foreach (var k in result.Missing)
+                sb.AppendLine($"  - {k}");
+            sb.AppendLine();
+        }
+        if (result.Outdated.Count > 0)
+        {
+            sb.AppendLine(_locService.T("validation.outdated"));
+            foreach (var k in result.Outdated)
+                sb.AppendLine($"  - {k}");
+            sb.AppendLine();
+        }
+        if (result.Deprecated.Count > 0)
+        {
+            sb.AppendLine(_locService.T("validation.deprecated"));
+            foreach (var k in result.Deprecated)
+                sb.AppendLine($"  - {k}");
+        }
+
+        MessageBox.Show(sb.ToString().TrimEnd(), _locService.T("validation.title"),
+            MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
+
     private async Task PersistAsync()
     {
         var cfg = _configService.Config;
@@ -362,6 +463,8 @@ public partial class SettingsViewModel : ObservableObject
         cfg.TranslationProvider = SelectedProvider;
         cfg.OcrEngine = SelectedOcrEngine;
         cfg.Hotkey.CaptureKey = CaptureHotkey;
+        cfg.Hotkey.CopyTranslateKey = CopyTranslateHotkey;
+        cfg.Hotkey.StopSpeechKey = StopSpeechHotkey;
         cfg.Overlay.Opacity = OverlayOpacity;
         cfg.Overlay.FontSize = OverlayFontSize;
         cfg.Overlay.ShowOnTranslate = ShowOverlayOnTranslate;
@@ -375,6 +478,7 @@ public partial class SettingsViewModel : ObservableObject
 
         cfg.Gesture.Enabled = GestureEnabled;
         cfg.Gesture.MouseButton = GestureMouseButton;
+        cfg.InterfaceLanguage = SelectedInterfaceLanguage?.Code ?? "auto";
 
         await _configService.SaveAsync();
     }
@@ -444,4 +548,9 @@ public record ModelInfo(string Id, string Name, string? Pricing, bool SupportsVi
         var vision = SupportsVision ? " [vision]" : "";
         return Pricing is not null ? $"{Name}{vision}  ({Pricing})" : $"{Name}{vision}";
     }
+}
+
+public record LanguageOption(string Code, string Label)
+{
+    public override string ToString() => Label;
 }
