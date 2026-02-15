@@ -4,6 +4,9 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using Microsoft.Extensions.DependencyInjection;
 using ScreenTranslator.App.Pages;
+using ScreenTranslator.App.Services;
+using ScreenTranslator.App.Windows;
+using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Hotkey;
 using ScreenTranslator.Core.Services.Interfaces;
 using Forms = System.Windows.Forms;
@@ -21,6 +24,7 @@ public partial class MainWindow : Window
     private const int LongPressMs = 2000;
 
     private readonly IConfigService _configService;
+    private readonly IScreenshotService _screenshotService;
     private readonly GlobalHotkeyService _hotkeyService;
     private readonly ITtsService _ttsService;
 
@@ -34,6 +38,9 @@ public partial class MainWindow : Window
     private bool _forceClose;
     private bool _disposed;
 
+    private GlobalMouseHookService? _mouseHookService;
+    private GestureTrailWindow? _gestureTrailWindow;
+
     private const int WM_HOTKEY = 0x0312;
 
     public MainWindow()
@@ -41,6 +48,7 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         _configService = App.Services.GetRequiredService<IConfigService>();
+        _screenshotService = App.Services.GetRequiredService<IScreenshotService>();
         _hotkeyService = App.Services.GetRequiredService<GlobalHotkeyService>();
         _ttsService = App.Services.GetRequiredService<ITtsService>();
 
@@ -130,6 +138,44 @@ public partial class MainWindow : Window
                 }));
         }
         catch { }
+
+        // Setup mouse gesture hook and trail window
+        _gestureTrailWindow = new GestureTrailWindow();
+        _gestureTrailWindow.Show(); // Show once permanently (transparent + click-through)
+
+        _mouseHookService = new GlobalMouseHookService(() => _configService.Config.Gesture);
+        _mouseHookService.GestureStarted += OnGestureStarted;
+        _mouseHookService.GesturePointAdded += OnGesturePointAdded;
+        _mouseHookService.GestureCompleted += OnGestureCompleted;
+        _mouseHookService.GestureCancelled += OnGestureCancelled;
+        _mouseHookService.Install();
+    }
+
+    private void OnGestureStarted(double x, double y)
+    {
+        _gestureTrailWindow?.ShowTrail();
+        _gestureTrailWindow?.AddPoint(x, y);
+    }
+
+    private void OnGesturePointAdded(double x, double y)
+    {
+        _gestureTrailWindow?.AddPoint(x, y);
+    }
+
+    private void OnGestureCompleted(ScreenRegion region)
+    {
+        _gestureTrailWindow?.HideTrail();
+
+        _translatePage ??= new TranslatePage();
+        NavigateTo("translate");
+
+        var screenshot = _screenshotService.CaptureRegion(region);
+        _translatePage.ProcessScreenshot(screenshot);
+    }
+
+    private void OnGestureCancelled()
+    {
+        _gestureTrailWindow?.HideTrail();
     }
 
     private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
@@ -257,6 +303,8 @@ public partial class MainWindow : Window
     protected override void OnClosed(EventArgs e)
     {
         CleanupTrayIcon();
+        _mouseHookService?.Dispose();
+        _gestureTrailWindow?.Close();
         _hotkeyService.Dispose();
         base.OnClosed(e);
     }

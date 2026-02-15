@@ -16,6 +16,11 @@ public partial class SettingsViewModel : ObservableObject
     public IReadOnlyList<TranslationProvider> Providers { get; } = Enum.GetValues<TranslationProvider>();
     public IReadOnlyList<OcrEngine> OcrEngines { get; } = Enum.GetValues<OcrEngine>();
     public IReadOnlyList<string> AvailableVoices { get; }
+    public IReadOnlyList<MouseButtonOption> MouseButtons { get; } =
+    [
+        new(1, "XButton1 (Back)"),
+        new(2, "XButton2 (Forward)")
+    ];
 
     [ObservableProperty]
     private TranslationProvider _selectedProvider;
@@ -107,6 +112,12 @@ public partial class SettingsViewModel : ObservableObject
     private bool _autoSpeakTranslation;
 
     [ObservableProperty]
+    private bool _gestureEnabled;
+
+    [ObservableProperty]
+    private int _gestureMouseButton = 2;
+
+    [ObservableProperty]
     private string _statusMessage = "";
 
     private bool _isLoading;
@@ -143,6 +154,9 @@ public partial class SettingsViewModel : ObservableObject
         TtsRate = cfg.Tts.Rate;
         TtsVolume = cfg.Tts.Volume;
         AutoSpeakTranslation = cfg.Tts.AutoSpeakTranslation;
+
+        GestureEnabled = cfg.Gesture.Enabled;
+        GestureMouseButton = cfg.Gesture.MouseButton;
 
         _isLoading = false;
     }
@@ -338,6 +352,8 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnTtsRateChanged(int value) => ScheduleAutoSave();
     partial void OnTtsVolumeChanged(int value) => ScheduleAutoSave();
     partial void OnAutoSpeakTranslationChanged(bool value) => ScheduleAutoSave();
+    partial void OnGestureEnabledChanged(bool value) => ScheduleAutoSave();
+    partial void OnGestureMouseButtonChanged(int value) => ScheduleAutoSave();
 
     private async Task PersistAsync()
     {
@@ -356,6 +372,9 @@ public partial class SettingsViewModel : ObservableObject
         cfg.Tts.Rate = TtsRate;
         cfg.Tts.Volume = TtsVolume;
         cfg.Tts.AutoSpeakTranslation = AutoSpeakTranslation;
+
+        cfg.Gesture.Enabled = GestureEnabled;
+        cfg.Gesture.MouseButton = GestureMouseButton;
 
         await _configService.SaveAsync();
     }
@@ -406,10 +425,16 @@ public partial class SettingsViewModel : ObservableObject
         _configService.Config.ActiveOpenAiPreset = fresh.ActiveOpenAiPreset;
         _configService.Config.Tts = fresh.Tts;
         _configService.Config.AutoDetectLanguage = fresh.AutoDetectLanguage;
+        _configService.Config.Gesture = fresh.Gesture;
         LoadFromConfig();
         await _configService.SaveAsync();
         StatusMessage = "Reset to defaults";
     }
+}
+
+public record MouseButtonOption(int Value, string Label)
+{
+    public override string ToString() => Label;
 }
 
 public record ModelInfo(string Id, string Name, string? Pricing, bool SupportsVision)

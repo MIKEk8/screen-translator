@@ -44,6 +44,7 @@ public class AppConfig
     public List<OpenAiPreset> OpenAiPresets { get; set; } = [new()];
     public string ActiveOpenAiPreset { get; set; } = "Default";
     public TtsConfig Tts { get; set; } = new();
+    public GestureConfig Gesture { get; set; } = new();
 
     public OpenAiPreset GetActivePreset() =>
         OpenAiPresets.FirstOrDefault(p => p.Name == ActiveOpenAiPreset)
@@ -105,6 +106,12 @@ public class TtsConfig
     public int Rate { get; set; } = 8;
     public int Volume { get; set; } = 100;
     public bool AutoSpeakTranslation { get; set; } = true;
+}
+
+public class GestureConfig
+{
+    public bool Enabled { get; set; }
+    public int MouseButton { get; set; } = 2; // 1=XButton1(back), 2=XButton2(forward)
 }
 
 public static class SupportedLanguages

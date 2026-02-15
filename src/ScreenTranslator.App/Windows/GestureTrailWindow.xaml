@@ -1,0 +1,17 @@
+<Window x:Class="ScreenTranslator.App.Windows.GestureTrailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Background="Transparent"
+        IsHitTestVisible="False">
+    <Canvas x:Name="TrailCanvas">
+        <Polyline x:Name="TrailLine"
+                  Stroke="#7c5cfc"
+                  StrokeThickness="3"
+                  StrokeLineJoin="Round"/>
+    </Canvas>
+</Window>

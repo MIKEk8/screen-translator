@@ -333,6 +333,11 @@ public partial class TranslatePage : Page
         await OcrAndTranslate(screenshot);
     }
 
+    public async void ProcessScreenshot(ScreenshotResult screenshot)
+    {
+        await OcrAndTranslate(screenshot);
+    }
+
     private void CaptureButton_Click(object sender, RoutedEventArgs e) => StartAreaCapture();
 
     private async void TranslateButton_Click(object sender, RoutedEventArgs e)
