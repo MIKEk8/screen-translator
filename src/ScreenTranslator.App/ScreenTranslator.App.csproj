@@ -39,8 +39,17 @@
     <Using Remove="System.Drawing" />
   </ItemGroup>
 
+  <!-- Keep COM interop and reflection enabled when trimming (System.Speech needs COM) -->
+  <PropertyGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+  </PropertyGroup>
+
   <!-- Protect reflection-heavy assemblies when trimming (dotnet publish -p:PublishTrimmed=true) -->
   <ItemGroup Condition="'$(PublishTrimmed)' == 'true'">
+    <TrimmerRootAssembly Include="PresentationCore" />
+    <TrimmerRootAssembly Include="PresentationFramework" />
+    <TrimmerRootAssembly Include="WindowsBase" />
+    <TrimmerRootAssembly Include="System.IO.Packaging" />
     <TrimmerRootAssembly Include="System.Speech" />
     <TrimmerRootAssembly Include="System.Drawing.Common" />
     <TrimmerRootAssembly Include="YamlDotNet" />

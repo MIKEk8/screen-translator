@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Interfaces;
 
@@ -31,18 +32,18 @@ public class OpenAiTranslationService : ITranslationService
                 .Replace("{source}", sourceLang)
                 .Replace("{target}", targetLang);
 
-        var requestBody = new
+        var requestBody = new JsonObject
         {
-            model = _config.Model,
-            messages = new[]
+            ["model"] = _config.Model,
+            ["messages"] = new JsonArray
             {
-                new { role = "system", content = systemPrompt },
-                new { role = "user", content = text }
+                new JsonObject { ["role"] = "system", ["content"] = systemPrompt },
+                new JsonObject { ["role"] = "user", ["content"] = text }
             },
-            temperature = 0.3
+            ["temperature"] = 0.3
         };
 
-        var json = JsonSerializer.Serialize(requestBody);
+        var json = requestBody.ToJsonString();
         var request = new HttpRequestMessage(HttpMethod.Post, url)
         {
             Content = new StringContent(json, Encoding.UTF8, "application/json")
@@ -87,26 +88,30 @@ public class OpenAiTranslationService : ITranslationService
 
         var base64Image = Convert.ToBase64String(imageData);
 
-        var requestBody = new
+        var requestBody = new JsonObject
         {
-            model = _config.Model,
-            messages = new object[]
+            ["model"] = _config.Model,
+            ["messages"] = new JsonArray
             {
-                new { role = "system", content = systemPrompt },
-                new
+                new JsonObject { ["role"] = "system", ["content"] = systemPrompt },
+                new JsonObject
                 {
-                    role = "user",
-                    content = new object[]
+                    ["role"] = "user",
+                    ["content"] = new JsonArray
                     {
-                        new { type = "text", text = $"Translate the text in this image from {sourceLang} to {targetLang}." },
-                        new { type = "image_url", image_url = new { url = $"data:image/png;base64,{base64Image}" } }
+                        new JsonObject { ["type"] = "text", ["text"] = $"Translate the text in this image from {sourceLang} to {targetLang}." },
+                        new JsonObject
+                        {
+                            ["type"] = "image_url",
+                            ["image_url"] = new JsonObject { ["url"] = $"data:image/png;base64,{base64Image}" }
+                        }
                     }
                 }
             },
-            temperature = 0.3
+            ["temperature"] = 0.3
         };
 
-        var json = JsonSerializer.Serialize(requestBody);
+        var json = requestBody.ToJsonString();
         var request = new HttpRequestMessage(HttpMethod.Post, url)
         {
             Content = new StringContent(json, Encoding.UTF8, "application/json")

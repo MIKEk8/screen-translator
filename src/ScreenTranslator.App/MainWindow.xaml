@@ -8,7 +8,6 @@
         WindowStyle="None"
         AllowsTransparency="True"
         ResizeMode="CanResizeWithGrip"
-        Icon="icon.ico"
         MouseLeftButtonDown="Window_MouseLeftButtonDown">
 
     <Border CornerRadius="16" Background="{StaticResource BgPrimaryBrush}"
@@ -24,7 +23,7 @@
                     CornerRadius="16,16,0,0" Padding="16,0">
                 <Grid>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="icon.ico" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center"
+                        <Image x:Name="TitleBarIcon" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center"
                                RenderOptions.BitmapScalingMode="HighQuality"/>
                         <TextBlock Text="Screen Translator" FontSize="14" FontWeight="SemiBold"
                                    Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>

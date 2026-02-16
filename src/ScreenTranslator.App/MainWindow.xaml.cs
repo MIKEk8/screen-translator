@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
 using ScreenTranslator.App.Pages;
 using ScreenTranslator.App.Services;
@@ -41,6 +42,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        LoadIcon();
 
         _configService = App.Services.GetRequiredService<IConfigService>();
         _screenshotService = App.Services.GetRequiredService<IScreenshotService>();
@@ -57,6 +59,36 @@ public partial class MainWindow : Window
         AppDomain.CurrentDomain.UnhandledException += (_, _) => CleanupTrayIcon();
 
         Loaded += MainWindow_Loaded;
+    }
+
+    private void LoadIcon()
+    {
+        try
+        {
+            var iconUri = new Uri("pack://application:,,,/icon.ico", UriKind.Absolute);
+            var streamInfo = Application.GetResourceStream(iconUri);
+            if (streamInfo != null)
+            {
+                // Window icon
+                Icon = BitmapFrame.Create(streamInfo.Stream, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.OnLoad);
+
+                // Title bar small icon
+                streamInfo = Application.GetResourceStream(iconUri);
+                if (streamInfo != null)
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.StreamSource = streamInfo.Stream;
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+                    TitleBarIcon.Source = bitmap;
+                }
+            }
+        }
+        catch
+        {
+            // Graceful fallback — no icon
+        }
     }
 
     private void ApplyTranslations()
