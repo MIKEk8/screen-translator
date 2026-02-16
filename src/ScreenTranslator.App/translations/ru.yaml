@@ -5,7 +5,7 @@
 
 language: ru
 language_name: Русский
-version: "1.1.0"
+version: "1.2.0"
 
 # ═══════════════════════════════════════
 # Главное окно
@@ -30,6 +30,8 @@ translate.speak_source: Озвучить исходный текст
 translate.speak_target: Озвучить перевод
 translate.ocr_engine: Движок OCR
 translate.provider: Провайдер перевода
+translate.copy_image: Копировать изображение
+translate.save_image: Сохранить изображение
 
 # Названия OCR-движков
 ocr.windows: Windows OCR
@@ -118,6 +120,7 @@ settings.language: ЯЗЫК
 settings.interface_lang: Язык интерфейса
 settings.validate: Проверить переводы
 settings.reset: Сбросить настройки
+settings.reset_confirm: Вы уверены, что хотите сбросить все настройки?
 settings.saved: Сохранено
 
 # ═══════════════════════════════════════

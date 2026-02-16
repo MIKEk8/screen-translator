@@ -108,7 +108,7 @@ public class OpenAiPreset
 
 public class TtsConfig
 {
-    public string VoiceName { get; set; } = "Irina";
+    public string VoiceName { get; set; } = "Microsoft Irina Desktop";
     public int Rate { get; set; } = 8;
     public int Volume { get; set; } = 100;
     public bool AutoSpeakTranslation { get; set; } = true;

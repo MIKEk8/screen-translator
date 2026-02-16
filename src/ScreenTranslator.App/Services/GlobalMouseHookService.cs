@@ -18,6 +18,9 @@ public class GlobalMouseHookService : IDisposable
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
     private static extern IntPtr GetModuleHandle(string? lpModuleName);
 
+    [DllImport("user32.dll")]
+    private static extern void mouse_event(uint dwFlags, int dx, int dy, uint dwData, UIntPtr dwExtraInfo);
+
     private delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
 
     [StructLayout(LayoutKind.Sequential)]
@@ -44,10 +47,14 @@ public class GlobalMouseHookService : IDisposable
     private const int XBUTTON1 = 1;
     private const int XBUTTON2 = 2;
 
+    private const uint MOUSEEVENTF_XDOWN = 0x0080;
+    private const uint MOUSEEVENTF_XUP = 0x0100;
+
     private IntPtr _hookId = IntPtr.Zero;
     private readonly LowLevelMouseProc _hookProc;
     private GestureRecognizer? _recognizer;
     private bool _tracking;
+    private bool _reinjecting;
     private readonly Func<GestureConfig> _getConfig;
 
     public event Action<double, double>? GestureStarted;
@@ -72,6 +79,10 @@ public class GlobalMouseHookService : IDisposable
     private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
     {
         if (nCode < 0)
+            return CallNextHookEx(_hookId, nCode, wParam, lParam);
+
+        // Pass through our own re-injected events
+        if (_reinjecting)
             return CallNextHookEx(_hookId, nCode, wParam, lParam);
 
         var config = _getConfig();
@@ -104,13 +115,20 @@ public class GlobalMouseHookService : IDisposable
                     var region = _recognizer.GetBoundingBox();
                     _recognizer = null;
                     GestureCompleted?.Invoke(region);
+                    return (IntPtr)1; // suppress — gesture recognized
                 }
-                else
-                {
-                    _recognizer = null;
-                    GestureCancelled?.Invoke();
-                }
-                return (IntPtr)1; // suppress native behavior
+
+                // Gesture not recognized — re-inject the original click
+                _recognizer = null;
+                GestureCancelled?.Invoke();
+
+                _reinjecting = true;
+                var xData = (uint)config.MouseButton;
+                mouse_event(MOUSEEVENTF_XDOWN, 0, 0, xData, UIntPtr.Zero);
+                mouse_event(MOUSEEVENTF_XUP, 0, 0, xData, UIntPtr.Zero);
+                _reinjecting = false;
+
+                return (IntPtr)1; // suppress the original up (re-injected pair replaces it)
             }
         }
         else if (msg == WM_MOUSEMOVE && _tracking && _recognizer is not null)

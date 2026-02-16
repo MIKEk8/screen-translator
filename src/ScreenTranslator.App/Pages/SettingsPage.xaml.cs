@@ -113,4 +113,16 @@ public partial class SettingsPage : Page
             _suppressModelPopup = false;
         }
     }
+
+    private async void ResetButton_Click(object sender, RoutedEventArgs e)
+    {
+        var result = MessageBox.Show(
+            _loc.T("settings.reset_confirm"),
+            _loc.T("settings.reset"),
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (result == MessageBoxResult.Yes && DataContext is SettingsViewModel vm)
+            await vm.ResetCommand.ExecuteAsync(null);
+    }
 }

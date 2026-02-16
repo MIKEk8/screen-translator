@@ -5,7 +5,7 @@
 
 language: en
 language_name: English
-version: "1.1.0"
+version: "1.2.0"
 
 # ═══════════════════════════════════════
 # Main window
@@ -30,6 +30,8 @@ translate.speak_source: Speak source text
 translate.speak_target: Speak translation
 translate.ocr_engine: OCR engine
 translate.provider: Translation provider
+translate.copy_image: Copy image to clipboard
+translate.save_image: Save image
 
 # OCR engine names
 ocr.windows: Windows OCR
@@ -118,6 +120,7 @@ settings.language: LANGUAGE
 settings.interface_lang: Interface language
 settings.validate: Validate translations
 settings.reset: Reset to Defaults
+settings.reset_confirm: Are you sure you want to reset all settings to defaults?
 settings.saved: Saved
 
 # ═══════════════════════════════════════

@@ -11,7 +11,7 @@ public record TranslationEntry(string Default, string Since);
 /// </summary>
 public static class TranslationKeys
 {
-    public const string CurrentVersion = "1.1.0";
+    public const string CurrentVersion = "1.2.0";
 
     public static readonly Dictionary<string, TranslationEntry> All = new()
     {
@@ -34,6 +34,8 @@ public static class TranslationKeys
         ["translate.speak_target"]       = new("Speak translation", "1.0.0"),
         ["translate.ocr_engine"]         = new("OCR engine", "1.1.0"),
         ["translate.provider"]           = new("Translation provider", "1.1.0"),
+        ["translate.copy_image"]         = new("Copy image to clipboard", "1.2.0"),
+        ["translate.save_image"]         = new("Save image", "1.2.0"),
 
         // ── Translate page — OCR options ──
         ["ocr.windows"]                  = new("Windows OCR", "1.1.0"),
@@ -116,6 +118,7 @@ public static class TranslationKeys
         ["settings.interface_lang"]      = new("Interface language", "1.1.0"),
         ["settings.validate"]            = new("Validate translations", "1.1.0"),
         ["settings.reset"]               = new("Reset to Defaults", "1.0.0"),
+        ["settings.reset_confirm"]       = new("Are you sure you want to reset all settings to defaults?", "1.2.0"),
         ["settings.saved"]               = new("Saved", "1.0.0"),
 
         // ── About page ──

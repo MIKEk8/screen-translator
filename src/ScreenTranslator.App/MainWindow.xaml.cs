@@ -223,9 +223,11 @@ public partial class MainWindow : Window
         _gestureTrailWindow?.AddPoint(x, y);
     }
 
-    private void OnGestureCompleted(ScreenRegion region)
+    private async void OnGestureCompleted(ScreenRegion region)
     {
         _gestureTrailWindow?.HideTrail();
+        await Task.Delay(50); // let the trail window disappear before capture
+
         FeedbackSound.Play();
 
         Log.Information("Gesture completed: {Region}", region);

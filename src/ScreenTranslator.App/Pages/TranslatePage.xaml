@@ -66,11 +66,34 @@
                              VerticalScrollBarVisibility="Auto"
                              BorderThickness="0" Background="Transparent"
                              FontSize="15"/>
-                    <Image x:Name="SourceImage"
-                           Visibility="Collapsed"
-                           Stretch="Uniform" Margin="4"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center"/>
+                    <Grid x:Name="SourceImagePanel" Visibility="Collapsed">
+                        <Image x:Name="SourceImage"
+                               Stretch="Uniform" Margin="4"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                                    Margin="4">
+                            <Button x:Name="CopyImageBtn" Content="&#x1F4CB;"
+                                    ToolTip="Copy image"
+                                    Style="{StaticResource AccentButton}"
+                                    Background="#80000000" FontSize="13"
+                                    Padding="5,2" Margin="0,0,2,0"
+                                    Click="CopyImage_Click"/>
+                            <Button x:Name="SaveImageBtn" Content="&#x1F4BE;"
+                                    ToolTip="Save image"
+                                    Style="{StaticResource AccentButton}"
+                                    Background="#80000000" FontSize="13"
+                                    Padding="5,2" Margin="0,0,2,0"
+                                    Click="SaveImage_Click"/>
+                            <Button x:Name="CloseImageBtn" Content="&#x2715;"
+                                    ToolTip="Close"
+                                    Style="{StaticResource AccentButton}"
+                                    Background="#80000000" FontSize="13"
+                                    Padding="5,2"
+                                    Click="CloseImage_Click"/>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
 

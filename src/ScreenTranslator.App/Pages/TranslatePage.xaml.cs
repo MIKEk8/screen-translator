@@ -33,6 +33,7 @@ public partial class TranslatePage : Page
     private readonly ILocalizationService _loc;
 
     private bool _isLoading;
+    private byte[]? _lastScreenshot;
 
     private record ProviderOption(string Label, TranslationProvider Provider, string? PresetName = null)
     {
@@ -94,6 +95,8 @@ public partial class TranslatePage : Page
         SpeakTargetButton.ToolTip = _loc.T("translate.speak_target");
         OcrCombo.ToolTip = _loc.T("translate.ocr_engine");
         ProviderCombo.ToolTip = _loc.T("translate.provider");
+        CopyImageBtn.ToolTip = _loc.T("translate.copy_image");
+        SaveImageBtn.ToolTip = _loc.T("translate.save_image");
         if (StatusText.Text == "Ready" || StatusText.Text == _loc.T("status.ready"))
             StatusText.Text = _loc.T("status.ready");
     }
@@ -361,6 +364,8 @@ public partial class TranslatePage : Page
     {
         try
         {
+            ShowSourceText();
+
             // Release Alt first — it's still held from the hotkey Alt+C
             keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
             await Task.Delay(50);
@@ -399,6 +404,8 @@ public partial class TranslatePage : Page
 
     private void ShowSourceImage(byte[] imageData)
     {
+        _lastScreenshot = imageData;
+
         var bitmapImage = new BitmapImage();
         bitmapImage.BeginInit();
         bitmapImage.StreamSource = new MemoryStream(imageData);
@@ -407,14 +414,53 @@ public partial class TranslatePage : Page
         bitmapImage.Freeze();
 
         SourceImage.Source = bitmapImage;
-        SourceImage.Visibility = Visibility.Visible;
+        SourceImagePanel.Visibility = Visibility.Visible;
         SourceTextBox.Visibility = Visibility.Collapsed;
     }
 
     private void ShowSourceText()
     {
-        SourceImage.Visibility = Visibility.Collapsed;
+        SourceImagePanel.Visibility = Visibility.Collapsed;
         SourceTextBox.Visibility = Visibility.Visible;
+    }
+
+    private void CloseImage_Click(object sender, RoutedEventArgs e) => ShowSourceText();
+
+    private void CopyImage_Click(object sender, RoutedEventArgs e)
+    {
+        if (SourceImage.Source is BitmapSource bitmap)
+            Clipboard.SetImage(bitmap);
+    }
+
+    private void SaveImage_Click(object sender, RoutedEventArgs e)
+    {
+        if (_lastScreenshot is null) return;
+
+        var dlg = new Microsoft.Win32.SaveFileDialog
+        {
+            Filter = "PNG|*.png|JPEG|*.jpg|BMP|*.bmp",
+            FileName = $"screenshot_{DateTime.Now:yyyyMMdd_HHmmss}"
+        };
+
+        if (dlg.ShowDialog() == true)
+        {
+            BitmapEncoder encoder = Path.GetExtension(dlg.FileName).ToLowerInvariant() switch
+            {
+                ".jpg" or ".jpeg" => new JpegBitmapEncoder(),
+                ".bmp" => new BmpBitmapEncoder(),
+                _ => new PngBitmapEncoder()
+            };
+
+            var bitmap = new BitmapImage();
+            bitmap.BeginInit();
+            bitmap.StreamSource = new MemoryStream(_lastScreenshot);
+            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+            bitmap.EndInit();
+
+            encoder.Frames.Add(BitmapFrame.Create(bitmap));
+            using var fs = File.Create(dlg.FileName);
+            encoder.Save(fs);
+        }
     }
 
     private void CaptureButton_Click(object sender, RoutedEventArgs e) => StartAreaCapture();

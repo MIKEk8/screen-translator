@@ -484,7 +484,7 @@
                            VerticalAlignment="Center" FontSize="12"/>
 
                 <Button x:Name="ResetButton" Grid.Column="1" Content="Reset to Defaults"
-                        Command="{Binding ResetCommand}"
+                        Click="ResetButton_Click"
                         Style="{StaticResource AccentButton}"
                         Background="{StaticResource BgTertiaryBrush}"
                         Padding="16,8"/>
