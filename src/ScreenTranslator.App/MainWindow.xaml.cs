@@ -10,6 +10,7 @@ using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Hotkey;
 using ScreenTranslator.Core.Services.Interfaces;
 using ScreenTranslator.Core.Services.Localization;
+using System.Runtime.InteropServices;
 using Serilog;
 using Forms = System.Windows.Forms;
 using Drawing = System.Drawing;
@@ -31,13 +32,20 @@ public partial class MainWindow : Window
     private string _currentPage = "translate";
 
     private Forms.NotifyIcon? _trayIcon;
+    private Drawing.Icon? _originalTrayIcon;
     private bool _forceClose;
     private bool _disposed;
+
+    public static UpdateInfo? AvailableUpdate { get; internal set; }
 
     private GlobalMouseHookService? _mouseHookService;
     private GestureTrailWindow? _gestureTrailWindow;
 
     private const int WM_HOTKEY = 0x0312;
+    private const uint KEYEVENTF_KEYUP = 0x0002;
+
+    [DllImport("user32.dll")]
+    private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
 
     public MainWindow()
     {
@@ -102,8 +110,9 @@ public partial class MainWindow : Window
         // Update tray menu
         if (_trayIcon?.ContextMenuStrip is { } menu)
         {
-            menu.Items[0].Text = _loc.T("tray.show");
-            menu.Items[2].Text = _loc.T("tray.exit");
+            menu.Items[0].Text = _loc.T("translate.capture");
+            menu.Items[1].Text = _loc.T("tray.show");
+            menu.Items[3].Text = _loc.T("tray.exit");
         }
     }
 
@@ -111,13 +120,13 @@ public partial class MainWindow : Window
     {
         var iconUri = new Uri("pack://application:,,,/icon.ico", UriKind.Absolute);
         var streamInfo = Application.GetResourceStream(iconUri);
-        var icon = streamInfo != null
+        _originalTrayIcon = streamInfo != null
             ? new Drawing.Icon(streamInfo.Stream)
             : Drawing.SystemIcons.Application;
 
         _trayIcon = new Forms.NotifyIcon
         {
-            Icon = icon,
+            Icon = _originalTrayIcon,
             Text = "Screen Translator",
             Visible = true
         };
@@ -125,6 +134,7 @@ public partial class MainWindow : Window
         _trayIcon.DoubleClick += (_, _) => ShowFromTray();
 
         var contextMenu = new Forms.ContextMenuStrip();
+        contextMenu.Items.Add("Capture", null, (_, _) => Dispatcher.Invoke(HandleCaptureHotkey));
         contextMenu.Items.Add("Show", null, (_, _) => ShowFromTray());
         contextMenu.Items.Add("-");
         contextMenu.Items.Add("Exit", null, (_, _) =>
@@ -146,6 +156,8 @@ public partial class MainWindow : Window
     private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         await _configService.LoadAsync();
+        FeedbackSound.SetVolume(_configService.Config.NotificationVolume);
+        _configService.ConfigChanged += cfg => Dispatcher.Invoke(() => FeedbackSound.SetVolume(cfg.NotificationVolume));
 
         // Navigate to translate page
         NavigateTo("translate");
@@ -184,6 +196,9 @@ public partial class MainWindow : Window
                 }));
         }
         catch { }
+
+        // Start background update checker
+        UpdateChecker.Start(info => Dispatcher.Invoke(() => OnUpdateChecked(info)));
 
         // Setup mouse gesture hook and trail window
         _gestureTrailWindow = new GestureTrailWindow();
@@ -233,9 +248,53 @@ public partial class MainWindow : Window
         {
             handled = _hotkeyService.HandleMessage(wParam.ToInt32());
             if (handled)
+            {
                 FeedbackSound.Play();
+
+                // Prevent Alt from activating the menu bar in the foreground app.
+                // RegisterHotKey eats the key combo but not the WM_SYSKEYUP for Alt,
+                // so the browser sees "bare Alt press" and opens the menu.
+                // Injecting a dummy keypress breaks the "bare Alt" sequence.
+                keybd_event(0, 0, 0, UIntPtr.Zero);
+                keybd_event(0, 0, KEYEVENTF_KEYUP, UIntPtr.Zero);
+            }
         }
         return IntPtr.Zero;
+    }
+
+    private void OnUpdateChecked(UpdateInfo? info)
+    {
+        AvailableUpdate = info;
+        if (info is not null)
+        {
+            // Badge on tray icon
+            if (_originalTrayIcon is not null && _trayIcon is not null)
+            {
+                _trayIcon.Icon = CreateBadgedIcon(_originalTrayIcon);
+                _trayIcon.Text = "Screen Translator — update available";
+            }
+
+            // Badge on About nav button
+            UpdateBadge.Visibility = Visibility.Visible;
+        }
+    }
+
+    private static Drawing.Icon CreateBadgedIcon(Drawing.Icon original)
+    {
+        using var bitmap = original.ToBitmap();
+        using var g = Drawing.Graphics.FromImage(bitmap);
+        var size = 10;
+        var x = bitmap.Width - size - 1;
+        var y = bitmap.Height - size - 1;
+        using var brush = new Drawing.SolidBrush(Drawing.Color.FromArgb(74, 222, 128));
+        g.FillEllipse(brush, x, y, size, size);
+        return Drawing.Icon.FromHandle(bitmap.GetHicon());
+    }
+
+    public void ForceClose()
+    {
+        _forceClose = true;
+        Close();
     }
 
     private void HandleCaptureHotkey()

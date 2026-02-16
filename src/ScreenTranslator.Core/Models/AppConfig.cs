@@ -47,6 +47,8 @@ public class AppConfig
     public TtsConfig Tts { get; set; } = new();
     public GestureConfig Gesture { get; set; } = new();
     public TesseractOcrConfig TesseractOcr { get; set; } = new();
+    public int NotificationVolume { get; set; } = 100;
+    public bool StartMinimized { get; set; }
 
     public OpenAiPreset GetActivePreset() =>
         OpenAiPresets.FirstOrDefault(p => p.Name == ActiveOpenAiPreset)

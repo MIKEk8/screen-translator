@@ -71,12 +71,19 @@
                                 Click="NavSettings_Click"
                                 HorizontalContentAlignment="Center"
                                 Padding="0,10" FontSize="20" Margin="0,0,0,4"/>
-                        <Button x:Name="NavAbout" Content="&#x2139;"
+                        <Button x:Name="NavAbout"
                                 ToolTip="About"
                                 Style="{StaticResource NavButton}"
                                 Click="NavAbout_Click"
                                 HorizontalContentAlignment="Center"
-                                Padding="0,10" FontSize="20"/>
+                                Padding="0,10" FontSize="20">
+                            <Grid>
+                                <TextBlock Text="&#x2139;" FontSize="20" HorizontalAlignment="Center"/>
+                                <Ellipse x:Name="UpdateBadge" Width="8" Height="8"
+                                         Fill="#4ade80" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                         Margin="0,-2,-2,0" Visibility="Collapsed"/>
+                            </Grid>
+                        </Button>
                     </StackPanel>
                 </Border>
 

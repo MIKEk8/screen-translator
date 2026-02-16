@@ -24,6 +24,11 @@ public partial class SettingsPage : Page
     private void ApplyTranslations()
     {
         TitleText.Text = _loc.T("settings.title");
+
+        AppSectionText.Text = _loc.T("settings.application");
+        AutostartCheckBox.Content = _loc.T("settings.autostart");
+        StartMinimizedCheckBox.Content = _loc.T("settings.start_minimized");
+
         LangSectionText.Text = _loc.T("settings.language");
         InterfaceLangText.Text = _loc.T("settings.interface_lang");
         ValidateButton.Content = _loc.T("settings.validate");
@@ -54,6 +59,8 @@ public partial class SettingsPage : Page
         VolumeText.Text = _loc.T("settings.volume");
         AutoSpeakCheckBox.Content = _loc.T("settings.auto_speak");
         TestVoiceBtn.Content = $"\u25B6 {_loc.T("settings.test")}";
+
+        NotificationVolumeText.Text = _loc.T("settings.notification_volume");
 
         HotkeysSectionText.Text = _loc.T("settings.hotkeys");
         HotkeyCaptureText.Text = _loc.T("settings.hotkey_capture");

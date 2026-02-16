@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Interfaces;
 using ScreenTranslator.Core.Services.Localization;
@@ -122,6 +123,15 @@ public partial class SettingsViewModel : ObservableObject
     private bool _autoSpeakTranslation;
 
     [ObservableProperty]
+    private int _notificationVolume = 100;
+
+    [ObservableProperty]
+    private bool _autostartEnabled;
+
+    [ObservableProperty]
+    private bool _startMinimized;
+
+    [ObservableProperty]
     private bool _gestureEnabled;
 
     [ObservableProperty]
@@ -182,6 +192,10 @@ public partial class SettingsViewModel : ObservableObject
         TtsRate = cfg.Tts.Rate;
         TtsVolume = cfg.Tts.Volume;
         AutoSpeakTranslation = cfg.Tts.AutoSpeakTranslation;
+
+        NotificationVolume = cfg.NotificationVolume;
+        StartMinimized = cfg.StartMinimized;
+        AutostartEnabled = IsAutostartEnabled();
 
         GestureEnabled = cfg.Gesture.Enabled;
         GestureMouseButton = cfg.Gesture.MouseButton;
@@ -387,6 +401,13 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnTtsRateChanged(int value) => ScheduleAutoSave();
     partial void OnTtsVolumeChanged(int value) => ScheduleAutoSave();
     partial void OnAutoSpeakTranslationChanged(bool value) => ScheduleAutoSave();
+    partial void OnNotificationVolumeChanged(int value) => ScheduleAutoSave();
+    partial void OnAutostartEnabledChanged(bool value)
+    {
+        if (_isLoading) return;
+        SetAutostart(value);
+    }
+    partial void OnStartMinimizedChanged(bool value) => ScheduleAutoSave();
     partial void OnGestureEnabledChanged(bool value) => ScheduleAutoSave();
     partial void OnGestureMouseButtonChanged(int value) => ScheduleAutoSave();
 
@@ -476,6 +497,9 @@ public partial class SettingsViewModel : ObservableObject
         cfg.Tts.Volume = TtsVolume;
         cfg.Tts.AutoSpeakTranslation = AutoSpeakTranslation;
 
+        cfg.NotificationVolume = NotificationVolume;
+        cfg.StartMinimized = StartMinimized;
+
         cfg.Gesture.Enabled = GestureEnabled;
         cfg.Gesture.MouseButton = GestureMouseButton;
         cfg.InterfaceLanguage = SelectedInterfaceLanguage?.Code ?? "auto";
@@ -530,9 +554,30 @@ public partial class SettingsViewModel : ObservableObject
         _configService.Config.Tts = fresh.Tts;
         _configService.Config.AutoDetectLanguage = fresh.AutoDetectLanguage;
         _configService.Config.Gesture = fresh.Gesture;
+        _configService.Config.NotificationVolume = fresh.NotificationVolume;
+        _configService.Config.StartMinimized = fresh.StartMinimized;
         LoadFromConfig();
         await _configService.SaveAsync();
         StatusMessage = "Reset to defaults";
+    }
+
+    private const string AutostartRegistryKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+    private const string AutostartValueName = "ScreenTranslator";
+
+    private static bool IsAutostartEnabled()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(AutostartRegistryKey);
+        return key?.GetValue(AutostartValueName) is not null;
+    }
+
+    private static void SetAutostart(bool enabled)
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(AutostartRegistryKey, writable: true);
+        if (key is null) return;
+        if (enabled)
+            key.SetValue(AutostartValueName, $"\"{Environment.ProcessPath}\"");
+        else
+            key.DeleteValue(AutostartValueName, throwOnMissingValue: false);
     }
 }
 

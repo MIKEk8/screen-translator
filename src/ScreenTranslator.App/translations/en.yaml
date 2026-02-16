@@ -88,6 +88,7 @@ settings.speed: Speed
 settings.volume: Volume
 settings.auto_speak: Auto-speak translation
 settings.test: Test
+settings.notification_volume: Notification
 
 # Hotkeys
 settings.hotkeys: HOTKEYS
@@ -106,6 +107,11 @@ settings.overlay: OVERLAY
 settings.overlay_show: Show overlay on translate
 settings.opacity: Opacity
 settings.font_size: Font size
+
+# Application
+settings.application: APPLICATION
+settings.autostart: Launch at Windows startup
+settings.start_minimized: Start minimized to tray
 
 # Language & actions
 settings.language: LANGUAGE
@@ -130,6 +136,13 @@ about.hotkey_stop: Stop speech
 about.gesture: MOUSE GESTURE
 about.gesture_desc: Hold a mouse side button (XButton) and draw a circle or oval around text on screen. The enclosed area will be captured, recognized, and translated automatically.
 about.gesture_config: Configure the mouse button and enable/disable in Settings.
+about.check_updates: Check for updates
+about.update_available: "{0} available"
+about.up_to_date: Up to date
+about.update_error: Could not check for updates
+about.download: Download
+about.update: Update
+about.updating: Updating...
 about.footer: Personal project
 
 # ═══════════════════════════════════════

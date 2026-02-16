@@ -86,6 +86,7 @@ public static class TranslationKeys
         ["settings.volume"]              = new("Volume", "1.0.0"),
         ["settings.auto_speak"]          = new("Auto-speak translation", "1.0.0"),
         ["settings.test"]                = new("Test", "1.0.0"),
+        ["settings.notification_volume"] = new("Notification", "1.1.0"),
 
         // ── Settings — Hotkeys ──
         ["settings.hotkeys"]             = new("HOTKEYS", "1.0.0"),
@@ -104,6 +105,11 @@ public static class TranslationKeys
         ["settings.overlay_show"]        = new("Show overlay on translate", "1.0.0"),
         ["settings.opacity"]             = new("Opacity", "1.0.0"),
         ["settings.font_size"]           = new("Font size", "1.0.0"),
+
+        // ── Settings — Application ──
+        ["settings.application"]         = new("APPLICATION", "1.1.0"),
+        ["settings.autostart"]           = new("Launch at Windows startup", "1.1.0"),
+        ["settings.start_minimized"]     = new("Start minimized to tray", "1.1.0"),
 
         // ── Settings — Language ──
         ["settings.language"]            = new("LANGUAGE", "1.1.0"),
@@ -126,6 +132,13 @@ public static class TranslationKeys
         ["about.gesture"]                = new("MOUSE GESTURE", "1.1.0"),
         ["about.gesture_desc"]           = new("Hold a mouse side button (XButton) and draw a circle or oval around text on screen. The enclosed area will be captured, recognized, and translated automatically.", "1.1.0"),
         ["about.gesture_config"]         = new("Configure the mouse button and enable/disable in Settings.", "1.1.0"),
+        ["about.check_updates"]          = new("Check for updates", "1.1.0"),
+        ["about.update_available"]       = new("{0} available", "1.1.0"),
+        ["about.up_to_date"]             = new("Up to date", "1.1.0"),
+        ["about.update_error"]           = new("Could not check for updates", "1.1.0"),
+        ["about.download"]              = new("Download", "1.1.0"),
+        ["about.update"]                = new("Update", "1.1.0"),
+        ["about.updating"]              = new("Updating...", "1.1.0"),
         ["about.footer"]                 = new("Personal project", "1.0.0"),
 
         // ── Area selector ──

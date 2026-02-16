@@ -70,6 +70,12 @@ public partial class App : Application
             locService.SetLanguage(lang);
 
             base.OnStartup(e);
+
+            var mainWindow = new MainWindow();
+            MainWindow = mainWindow;
+            mainWindow.Show();
+            if (configService.Config.StartMinimized)
+                mainWindow.Hide();
         }
         catch (Exception ex)
         {

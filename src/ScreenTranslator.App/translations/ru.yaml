@@ -88,6 +88,7 @@ settings.speed: Скорость
 settings.volume: Громкость
 settings.auto_speak: Автоозвучка перевода
 settings.test: Тест
+settings.notification_volume: Уведомление
 
 # Горячие клавиши
 settings.hotkeys: ГОРЯЧИЕ КЛАВИШИ
@@ -106,6 +107,11 @@ settings.overlay: ОВЕРЛЕЙ
 settings.overlay_show: Показывать оверлей при переводе
 settings.opacity: Прозрачность
 settings.font_size: Размер шрифта
+
+# Приложение
+settings.application: ПРИЛОЖЕНИЕ
+settings.autostart: Запускать при старте Windows
+settings.start_minimized: Запускать свёрнутым в трей
 
 # Язык и действия
 settings.language: ЯЗЫК
@@ -130,6 +136,13 @@ about.hotkey_stop: Остановить озвучку
 about.gesture: ЖЕСТ МЫШЬЮ
 about.gesture_desc: Удерживайте боковую кнопку мыши (XButton) и обведите текст на экране кругом или овалом. Выделенная область будет захвачена, распознана и переведена автоматически.
 about.gesture_config: Настроить кнопку мыши и включить/выключить можно в Настройках.
+about.check_updates: Проверить обновления
+about.update_available: "Доступна {0}"
+about.up_to_date: Актуальная версия
+about.update_error: Не удалось проверить обновления
+about.download: Скачать
+about.update: Обновить
+about.updating: Обновление...
 about.footer: Персональный проект
 
 # ═══════════════════════════════════════

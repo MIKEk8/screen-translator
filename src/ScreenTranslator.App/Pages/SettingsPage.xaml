@@ -10,6 +10,24 @@
             <TextBlock x:Name="TitleText" Text="Settings" FontSize="22" FontWeight="Bold"
                        Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,24"/>
 
+            <!-- ═══ Application ═══ -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock x:Name="AppSectionText" Text="APPLICATION" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
+                               Margin="0,0,0,14"/>
+
+                    <CheckBox x:Name="AutostartCheckBox" Content="Launch at Windows startup"
+                              IsChecked="{Binding AutostartEnabled}"
+                              Foreground="{StaticResource TextPrimaryBrush}"
+                              FontSize="13" Margin="0,0,0,10"/>
+
+                    <CheckBox x:Name="StartMinimizedCheckBox" Content="Start minimized to tray"
+                              IsChecked="{Binding StartMinimized}"
+                              Foreground="{StaticResource TextPrimaryBrush}"
+                              FontSize="13"/>
+                </StackPanel>
+            </Border>
+
             <!-- ═══ Language ═══ -->
             <Border Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
@@ -301,7 +319,7 @@
                                    VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
                     </Grid>
 
-                    <Grid>
+                    <Grid Margin="0,0,0,12">
                         <CheckBox x:Name="AutoSpeakCheckBox" Content="Auto-speak translation"
                                   IsChecked="{Binding AutoSpeakTranslation}"
                                   Foreground="{StaticResource TextPrimaryBrush}"
@@ -311,6 +329,24 @@
                                 Style="{StaticResource AccentButton}"
                                 Background="{StaticResource BgTertiaryBrush}"
                                 Padding="14,6" FontSize="12"/>
+                    </Grid>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="40"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="NotificationVolumeText" Text="Notification" Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center" FontSize="13"/>
+                        <Slider Grid.Column="1" Minimum="0" Maximum="100"
+                                Value="{Binding NotificationVolume}"
+                                TickFrequency="10" IsSnapToTickEnabled="True"
+                                VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2"
+                                   Text="{Binding NotificationVolume, StringFormat={}{0}%}"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
                     </Grid>
                 </StackPanel>
             </Border>
@@ -323,8 +359,8 @@
 
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="HotkeyCaptureText" Text="Capture" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
@@ -334,8 +370,8 @@
 
                     <Grid Margin="0,0,0,10">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="HotkeyCopyText" Text="Copy &amp; Translate" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
@@ -345,8 +381,8 @@
 
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock x:Name="HotkeyStopText" Text="Stop Speech" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
