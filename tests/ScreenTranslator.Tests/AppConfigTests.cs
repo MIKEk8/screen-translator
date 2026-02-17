@@ -61,13 +61,14 @@ public class AppConfigTests
         Assert.Equal(TranslationProvider.Google, config.TranslationProvider);
         Assert.True(config.AutoDetectLanguage);
         Assert.Equal("auto", config.InterfaceLanguage);
-        Assert.Single(config.OpenAiPresets);
+        Assert.Equal(3, config.OpenAiPresets.Count);
+        Assert.Equal("Qwen3 Next 80B", config.ActiveOpenAiPreset);
         Assert.Equal("Alt+A", config.Hotkey.CaptureKey);
         Assert.Equal("Alt+C", config.Hotkey.CopyTranslateKey);
         Assert.Equal("Alt+X", config.Hotkey.StopSpeechKey);
         Assert.Equal(0.9, config.Overlay.Opacity);
         Assert.True(config.Overlay.ShowOnTranslate);
-        Assert.False(config.Gesture.Enabled);
+        Assert.True(config.Gesture.Enabled);
     }
 
     [Fact]
@@ -101,9 +102,35 @@ public class AppConfigTests
     {
         var tts = new TtsConfig();
 
+        Assert.Equal(TtsProvider.Sapi5, tts.Provider);
         Assert.Equal(8, tts.Rate);
         Assert.Equal(100, tts.Volume);
         Assert.True(tts.AutoSpeakTranslation);
+        Assert.Equal("Qwen3-TTS", tts.TtsPresetName);
+        Assert.Equal("qwen/qwen3-tts", tts.TtsModel);
+        Assert.Equal("alloy", tts.TtsVoice);
+    }
+
+    [Fact]
+    public void GetTtsPreset_ReturnsMatchingPreset()
+    {
+        var config = new AppConfig();
+        config.Tts.TtsPresetName = "Qwen3-TTS";
+
+        var preset = config.GetTtsPreset();
+
+        Assert.Equal("Qwen3-TTS", preset.Name);
+    }
+
+    [Fact]
+    public void GetTtsPreset_NoMatch_ReturnsFallback()
+    {
+        var config = new AppConfig();
+        config.Tts.TtsPresetName = "Nonexistent";
+
+        var preset = config.GetTtsPreset();
+
+        Assert.NotNull(preset);
     }
 
     [Fact]
@@ -111,7 +138,7 @@ public class AppConfigTests
     {
         var gesture = new GestureConfig();
 
-        Assert.False(gesture.Enabled);
+        Assert.True(gesture.Enabled);
         Assert.Equal(2, gesture.MouseButton); // XButton2
     }
 

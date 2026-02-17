@@ -1,10 +1,13 @@
 using System.IO;
 using System.Threading;
 using System.Windows;
+using System.Windows.Media;
 using Microsoft.Extensions.DependencyInjection;
 using ScreenTranslator.App.ViewModels;
 using ScreenTranslator.Core;
+using ScreenTranslator.Core.Services.Interfaces;
 using ScreenTranslator.Core.Services.Localization;
+using ScreenTranslator.Core.Services.Tts;
 using Serilog;
 
 namespace ScreenTranslator.App;
@@ -55,6 +58,38 @@ public partial class App : Application
             var translationsDir = Path.Combine(AppContext.BaseDirectory, "translations");
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddScreenTranslatorCore(translationsDir);
+
+            // OpenAI-compatible TTS with WPF MediaPlayer audio callbacks
+            MediaPlayer? ttsPlayer = null;
+            bool ttsPlaying = false;
+
+            serviceCollection.AddSingleton(sp =>
+                new OpenAiTtsService(
+                    sp.GetRequiredService<IConfigService>(),
+                    playAudioFile: path =>
+                    {
+                        Current.Dispatcher.Invoke(() =>
+                        {
+                            ttsPlayer ??= new MediaPlayer();
+                            ttsPlayer.Stop();
+                            ttsPlayer.Open(new Uri(path));
+                            ttsPlaying = true;
+                            ttsPlayer.MediaEnded += (_, _) => ttsPlaying = false;
+                            ttsPlayer.MediaFailed += (_, _) => ttsPlaying = false;
+                            ttsPlayer.Play();
+                        });
+                    },
+                    stopAudio: () =>
+                    {
+                        Current.Dispatcher.Invoke(() =>
+                        {
+                            ttsPlayer?.Stop();
+                            ttsPlaying = false;
+                        });
+                    },
+                    isAudioPlaying: () => ttsPlaying));
+            serviceCollection.AddSingleton<ITtsService, TtsRouter>();
+
             serviceCollection.AddTransient<SettingsViewModel>();
             Services = serviceCollection.BuildServiceProvider();
 

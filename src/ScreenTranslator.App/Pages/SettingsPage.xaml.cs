@@ -54,9 +54,14 @@ public partial class SettingsPage : Page
         OllamaModelText.Text = _loc.T("settings.model");
 
         TtsSectionText.Text = _loc.T("settings.tts");
+        TtsProviderText.Text = _loc.T("settings.tts_provider");
         VoiceText.Text = _loc.T("settings.voice");
         SpeedText.Text = _loc.T("settings.speed");
         VolumeText.Text = _loc.T("settings.volume");
+        TtsOpenAiTitle.Text = _loc.T("settings.tts_openai_title");
+        TtsPresetText.Text = _loc.T("settings.tts_preset");
+        TtsModelText.Text = _loc.T("settings.tts_model");
+        TtsVoiceText.Text = _loc.T("settings.tts_voice");
         AutoSpeakCheckBox.Content = _loc.T("settings.auto_speak");
         TestVoiceBtn.Content = $"\u25B6 {_loc.T("settings.test")}";
 

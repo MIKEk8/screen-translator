@@ -20,7 +20,12 @@ public partial class SettingsViewModel : ObservableObject
 
     public IReadOnlyList<TranslationProvider> Providers { get; } = Enum.GetValues<TranslationProvider>();
     public IReadOnlyList<OcrEngine> OcrEngines { get; } = Enum.GetValues<OcrEngine>();
-    public IReadOnlyList<string> AvailableVoices { get; }
+    public IReadOnlyList<TtsProvider> TtsProviders { get; } = Enum.GetValues<TtsProvider>();
+
+    [ObservableProperty]
+    private IReadOnlyList<string> _availableVoices = [];
+
+    public IEnumerable<string> AvailablePresetNames => OpenAiPresets.Select(p => p.Name);
     public IReadOnlyList<MouseButtonOption> MouseButtons { get; } =
     [
         new(1, "XButton1 (Back)"),
@@ -123,6 +128,18 @@ public partial class SettingsViewModel : ObservableObject
     private bool _autoSpeakTranslation;
 
     [ObservableProperty]
+    private TtsProvider _selectedTtsProvider;
+
+    [ObservableProperty]
+    private string _ttsPresetName = "Qwen3-TTS";
+
+    [ObservableProperty]
+    private string _ttsModel = "qwen/qwen3-tts";
+
+    [ObservableProperty]
+    private string _ttsVoice = "alloy";
+
+    [ObservableProperty]
     private int _notificationVolume = 100;
 
     [ObservableProperty]
@@ -154,9 +171,9 @@ public partial class SettingsViewModel : ObservableObject
         _configService = configService;
         _ttsService = ttsService;
         _locService = locService;
-        AvailableVoices = ttsService.GetAvailableVoices();
         LoadLanguages();
         LoadFromConfig();
+        AvailableVoices = ttsService.GetAvailableVoices();
     }
 
     private void LoadLanguages()
@@ -188,10 +205,14 @@ public partial class SettingsViewModel : ObservableObject
             OpenAiPresets.Add(p);
         SelectedPreset = cfg.GetActivePreset();
 
+        SelectedTtsProvider = cfg.Tts.Provider;
         SelectedVoice = cfg.Tts.VoiceName;
         TtsRate = cfg.Tts.Rate;
         TtsVolume = cfg.Tts.Volume;
         AutoSpeakTranslation = cfg.Tts.AutoSpeakTranslation;
+        TtsPresetName = cfg.Tts.TtsPresetName;
+        TtsModel = cfg.Tts.TtsModel;
+        TtsVoice = cfg.Tts.TtsVoice;
 
         NotificationVolume = cfg.NotificationVolume;
         StartMinimized = cfg.StartMinimized;
@@ -243,6 +264,7 @@ public partial class SettingsViewModel : ObservableObject
             SelectedPreset = OpenAiPresets[idx];
             _isLoading = false;
         }
+        OnPropertyChanged(nameof(AvailablePresetNames));
         ScheduleAutoSave();
     }
 
@@ -269,6 +291,7 @@ public partial class SettingsViewModel : ObservableObject
         };
         OpenAiPresets.Add(preset);
         _configService.Config.OpenAiPresets = [.. OpenAiPresets];
+        OnPropertyChanged(nameof(AvailablePresetNames));
         SelectedPreset = preset;
     }
 
@@ -279,6 +302,7 @@ public partial class SettingsViewModel : ObservableObject
         var idx = OpenAiPresets.IndexOf(SelectedPreset);
         OpenAiPresets.Remove(SelectedPreset);
         _configService.Config.OpenAiPresets = [.. OpenAiPresets];
+        OnPropertyChanged(nameof(AvailablePresetNames));
         SelectedPreset = OpenAiPresets[Math.Min(idx, OpenAiPresets.Count - 1)];
     }
 
@@ -401,6 +425,20 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnTtsRateChanged(int value) => ScheduleAutoSave();
     partial void OnTtsVolumeChanged(int value) => ScheduleAutoSave();
     partial void OnAutoSpeakTranslationChanged(bool value) => ScheduleAutoSave();
+    partial void OnSelectedTtsProviderChanged(TtsProvider value)
+    {
+        if (!_isLoading)
+        {
+            _configService.Config.Tts.Provider = value;
+            AvailableVoices = _ttsService.GetAvailableVoices();
+            if (!AvailableVoices.Contains(SelectedVoice) && AvailableVoices.Count > 0)
+                SelectedVoice = AvailableVoices[0];
+        }
+        ScheduleAutoSave();
+    }
+    partial void OnTtsPresetNameChanged(string value) => ScheduleAutoSave();
+    partial void OnTtsModelChanged(string value) => ScheduleAutoSave();
+    partial void OnTtsVoiceChanged(string value) => ScheduleAutoSave();
     partial void OnNotificationVolumeChanged(int value) => ScheduleAutoSave();
     partial void OnAutostartEnabledChanged(bool value)
     {
@@ -492,10 +530,14 @@ public partial class SettingsViewModel : ObservableObject
         cfg.Ollama.Endpoint = OllamaEndpoint;
         cfg.Ollama.Model = OllamaModel;
         cfg.OpenAiPresets = [.. OpenAiPresets];
+        cfg.Tts.Provider = SelectedTtsProvider;
         cfg.Tts.VoiceName = SelectedVoice;
         cfg.Tts.Rate = TtsRate;
         cfg.Tts.Volume = TtsVolume;
         cfg.Tts.AutoSpeakTranslation = AutoSpeakTranslation;
+        cfg.Tts.TtsPresetName = TtsPresetName;
+        cfg.Tts.TtsModel = TtsModel;
+        cfg.Tts.TtsVoice = TtsVoice;
 
         cfg.NotificationVolume = NotificationVolume;
         cfg.StartMinimized = StartMinimized;
@@ -517,13 +559,21 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         var cfg = _configService.Config;
+        var prevProvider = cfg.Tts.Provider;
         var prevVoice = cfg.Tts.VoiceName;
         var prevRate = cfg.Tts.Rate;
         var prevVolume = cfg.Tts.Volume;
+        var prevTtsPreset = cfg.Tts.TtsPresetName;
+        var prevTtsModel = cfg.Tts.TtsModel;
+        var prevTtsVoice = cfg.Tts.TtsVoice;
 
+        cfg.Tts.Provider = SelectedTtsProvider;
         cfg.Tts.VoiceName = SelectedVoice;
         cfg.Tts.Rate = TtsRate;
         cfg.Tts.Volume = TtsVolume;
+        cfg.Tts.TtsPresetName = TtsPresetName;
+        cfg.Tts.TtsModel = TtsModel;
+        cfg.Tts.TtsVoice = TtsVoice;
 
         try
         {
@@ -532,9 +582,13 @@ public partial class SettingsViewModel : ObservableObject
         catch { /* ignore */ }
         finally
         {
+            cfg.Tts.Provider = prevProvider;
             cfg.Tts.VoiceName = prevVoice;
             cfg.Tts.Rate = prevRate;
             cfg.Tts.Volume = prevVolume;
+            cfg.Tts.TtsPresetName = prevTtsPreset;
+            cfg.Tts.TtsModel = prevTtsModel;
+            cfg.Tts.TtsVoice = prevTtsVoice;
         }
     }
 

@@ -41,8 +41,13 @@ public class AppConfig
     public HotkeyConfig Hotkey { get; set; } = new();
     public OverlayConfig Overlay { get; set; } = new();
     public OllamaConfig Ollama { get; set; } = new();
-    public List<OpenAiPreset> OpenAiPresets { get; set; } = [new()];
-    public string ActiveOpenAiPreset { get; set; } = "Default";
+    public List<OpenAiPreset> OpenAiPresets { get; set; } =
+    [
+        new() { Name = "Qwen3-TTS", ApiEndpoint = "https://openrouter.ai/api/v1", Model = "qwen/qwen3-tts" },
+        new() { Name = "Qwen3 Next 80B", ApiEndpoint = "https://openrouter.ai/api/v1", Model = "qwen/qwen3-next-80b-a3b-instruct" },
+        new() { Name = "Qwen3-VL 235B", ApiEndpoint = "https://openrouter.ai/api/v1", Model = "qwen/qwen3-vl-235b-a22b-instruct", UseVision = true }
+    ];
+    public string ActiveOpenAiPreset { get; set; } = "Qwen3 Next 80B";
     public string ActiveOcrPreset { get; set; } = "";
     public TtsConfig Tts { get; set; } = new();
     public GestureConfig Gesture { get; set; } = new();
@@ -52,6 +57,11 @@ public class AppConfig
 
     public OpenAiPreset GetActivePreset() =>
         OpenAiPresets.FirstOrDefault(p => p.Name == ActiveOpenAiPreset)
+        ?? OpenAiPresets.FirstOrDefault()
+        ?? new();
+
+    public OpenAiPreset GetTtsPreset() =>
+        OpenAiPresets.FirstOrDefault(p => p.Name == Tts.TtsPresetName)
         ?? OpenAiPresets.FirstOrDefault()
         ?? new();
     public bool AutoDetectLanguage { get; set; } = true;
@@ -72,6 +82,13 @@ public enum TranslationProvider
     Google,
     OpenAiCompatible,
     Ollama
+}
+
+[JsonConverter(typeof(TolerantEnumConverter<TtsProvider>))]
+public enum TtsProvider
+{
+    Sapi5,
+    OpenAiCompatible
 }
 
 public class HotkeyConfig
@@ -108,15 +125,23 @@ public class OpenAiPreset
 
 public class TtsConfig
 {
+    public TtsProvider Provider { get; set; } = TtsProvider.Sapi5;
+
+    // SAPI5
     public string VoiceName { get; set; } = "Microsoft Irina Desktop";
     public int Rate { get; set; } = 8;
     public int Volume { get; set; } = 100;
     public bool AutoSpeakTranslation { get; set; } = true;
+
+    // OpenAI-compatible TTS
+    public string TtsPresetName { get; set; } = "Qwen3-TTS";
+    public string TtsModel { get; set; } = "qwen/qwen3-tts";
+    public string TtsVoice { get; set; } = "alloy";
 }
 
 public class GestureConfig
 {
-    public bool Enabled { get; set; }
+    public bool Enabled { get; set; } = true;
     public int MouseButton { get; set; } = 2; // 1=XButton1(back), 2=XButton2(forward)
 }
 

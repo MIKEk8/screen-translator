@@ -19,7 +19,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IOcrService, OcrRouter>();
         services.AddSingleton<IScreenshotService, ScreenshotService>();
         services.AddSingleton<ITranslationService, TranslationRouter>();
-        services.AddSingleton<ITtsService, SapiTtsService>();
+        services.AddSingleton<SapiTtsService>();
         services.AddSingleton<MultiMonitorService>();
         services.AddSingleton<GlobalHotkeyService>();
         services.AddSingleton<IHotkeyService>(sp => sp.GetRequiredService<GlobalHotkeyService>());

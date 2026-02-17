@@ -5,7 +5,7 @@
 
 language: en
 language_name: English
-version: "1.2.0"
+version: "1.3.0"
 
 # ═══════════════════════════════════════
 # Main window
@@ -85,9 +85,14 @@ settings.ollama_title: Ollama Settings
 
 # Text-to-Speech
 settings.tts: TEXT-TO-SPEECH
+settings.tts_provider: Provider
 settings.voice: Voice
 settings.speed: Speed
 settings.volume: Volume
+settings.tts_openai_title: OpenAI TTS Settings
+settings.tts_preset: API Preset
+settings.tts_model: TTS Model
+settings.tts_voice: Voice
 settings.auto_speak: Auto-speak translation
 settings.test: Test
 settings.notification_volume: Notification

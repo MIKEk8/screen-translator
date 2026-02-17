@@ -270,55 +270,147 @@
                     <TextBlock x:Name="TtsSectionText" Text="TEXT-TO-SPEECH" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                Margin="0,0,0,14"/>
 
+                    <!-- TTS Provider -->
                     <Grid Margin="0,0,0,12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="120"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="VoiceText" Text="Voice" Foreground="{StaticResource TextSecondaryBrush}"
+                        <TextBlock x:Name="TtsProviderText" Text="Provider" Foreground="{StaticResource TextSecondaryBrush}"
                                    VerticalAlignment="Center" FontSize="13"/>
                         <ComboBox Grid.Column="1"
-                                  ItemsSource="{Binding AvailableVoices}"
-                                  SelectedItem="{Binding SelectedVoice}"
+                                  ItemsSource="{Binding TtsProviders}"
+                                  SelectedItem="{Binding SelectedTtsProvider}"
                                   Style="{StaticResource DarkComboBox}"/>
                     </Grid>
 
-                    <Grid Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="40"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="SpeedText" Text="Speed" Foreground="{StaticResource TextSecondaryBrush}"
-                                   VerticalAlignment="Center" FontSize="13"/>
-                        <Slider Grid.Column="1" Minimum="-10" Maximum="10"
-                                Value="{Binding TtsRate}"
-                                TickFrequency="1" IsSnapToTickEnabled="True"
-                                VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="2"
-                                   Text="{Binding TtsRate}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
-                    </Grid>
+                    <!-- SAPI5 section -->
+                    <StackPanel>
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTtsProvider}" Value="Sapi5">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
 
-                    <Grid Margin="0,0,0,12">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="120"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="40"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="VolumeText" Text="Volume" Foreground="{StaticResource TextSecondaryBrush}"
-                                   VerticalAlignment="Center" FontSize="13"/>
-                        <Slider Grid.Column="1" Minimum="0" Maximum="100"
-                                Value="{Binding TtsVolume}"
-                                TickFrequency="10" IsSnapToTickEnabled="True"
-                                VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="2"
-                                   Text="{Binding TtsVolume, StringFormat={}{0}%}"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
-                    </Grid>
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="VoiceText" Text="Voice" Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center" FontSize="13"/>
+                            <ComboBox Grid.Column="1"
+                                      ItemsSource="{Binding AvailableVoices}"
+                                      SelectedItem="{Binding SelectedVoice}"
+                                      Style="{StaticResource DarkComboBox}"/>
+                        </Grid>
 
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="SpeedText" Text="Speed" Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center" FontSize="13"/>
+                            <Slider Grid.Column="1" Minimum="-10" Maximum="10"
+                                    Value="{Binding TtsRate}"
+                                    TickFrequency="1" IsSnapToTickEnabled="True"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding TtsRate}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
+                        </Grid>
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="40"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="VolumeText" Text="Volume" Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center" FontSize="13"/>
+                            <Slider Grid.Column="1" Minimum="0" Maximum="100"
+                                    Value="{Binding TtsVolume}"
+                                    TickFrequency="10" IsSnapToTickEnabled="True"
+                                    VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding TtsVolume, StringFormat={}{0}%}"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="12"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- OpenAI TTS section -->
+                    <StackPanel Margin="0,0,0,8">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTtsProvider}" Value="OpenAiCompatible">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <Border Background="{StaticResource BgTertiaryBrush}" CornerRadius="8"
+                                Padding="14" Margin="0,0,0,4">
+                            <StackPanel>
+                                <TextBlock x:Name="TtsOpenAiTitle" Text="OpenAI TTS Settings"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="TtsPresetText" Text="API Preset"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center" FontSize="12"/>
+                                    <ComboBox Grid.Column="1"
+                                              ItemsSource="{Binding AvailablePresetNames}"
+                                              SelectedItem="{Binding TtsPresetName}"
+                                              Style="{StaticResource DarkComboBox}"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="TtsModelText" Text="TTS Model"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding TtsModel, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
+                                </Grid>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="TtsVoiceText" Text="Voice"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding TtsVoice, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Common: Auto-speak + Test -->
                     <Grid Margin="0,0,0,12">
                         <CheckBox x:Name="AutoSpeakCheckBox" Content="Auto-speak translation"
                                   IsChecked="{Binding AutoSpeakTranslation}"

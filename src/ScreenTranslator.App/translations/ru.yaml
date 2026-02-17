@@ -5,7 +5,7 @@
 
 language: ru
 language_name: Русский
-version: "1.2.0"
+version: "1.3.0"
 
 # ═══════════════════════════════════════
 # Главное окно
@@ -85,9 +85,14 @@ settings.ollama_title: Настройки Ollama
 
 # Синтез речи
 settings.tts: СИНТЕЗ РЕЧИ
+settings.tts_provider: Провайдер
 settings.voice: Голос
 settings.speed: Скорость
 settings.volume: Громкость
+settings.tts_openai_title: Настройки OpenAI TTS
+settings.tts_preset: API-пресет
+settings.tts_model: Модель TTS
+settings.tts_voice: Голос
 settings.auto_speak: Автоозвучка перевода
 settings.test: Тест
 settings.notification_volume: Уведомление

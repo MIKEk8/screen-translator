@@ -11,7 +11,7 @@ public record TranslationEntry(string Default, string Since);
 /// </summary>
 public static class TranslationKeys
 {
-    public const string CurrentVersion = "1.2.0";
+    public const string CurrentVersion = "1.3.0";
 
     public static readonly Dictionary<string, TranslationEntry> All = new()
     {
@@ -83,9 +83,14 @@ public static class TranslationKeys
 
         // ── Settings — TTS ──
         ["settings.tts"]                 = new("TEXT-TO-SPEECH", "1.0.0"),
+        ["settings.tts_provider"]        = new("Provider", "1.3.0"),
         ["settings.voice"]               = new("Voice", "1.0.0"),
         ["settings.speed"]               = new("Speed", "1.0.0"),
         ["settings.volume"]              = new("Volume", "1.0.0"),
+        ["settings.tts_openai_title"]    = new("OpenAI TTS Settings", "1.3.0"),
+        ["settings.tts_preset"]          = new("API Preset", "1.3.0"),
+        ["settings.tts_model"]           = new("TTS Model", "1.3.0"),
+        ["settings.tts_voice"]           = new("Voice", "1.3.0"),
         ["settings.auto_speak"]          = new("Auto-speak translation", "1.0.0"),
         ["settings.test"]                = new("Test", "1.0.0"),
         ["settings.notification_volume"] = new("Notification", "1.1.0"),
