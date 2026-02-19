@@ -166,4 +166,68 @@ public class JsonConfigServiceTests : IDisposable
         Assert.Equal("Local", svc2.Config.ActiveOpenAiPreset);
         Assert.Equal("local-model", svc2.Config.GetActivePreset().Model);
     }
+
+    [Fact]
+    public async Task Save_EncryptsApiKeys_LoadDecrypts()
+    {
+        var path = TempPath();
+        var svc = new JsonConfigService(path);
+        svc.Config.OpenAiPresets =
+        [
+            new OpenAiPreset { Name = "Test", ApiKey = "sk-secret-key-123" }
+        ];
+        svc.Config.Tts.DeepInfraApiKey = "di-secret-456";
+        await svc.SaveAsync();
+
+        // In-memory config should still have plaintext
+        Assert.Equal("sk-secret-key-123", svc.Config.OpenAiPresets[0].ApiKey);
+        Assert.Equal("di-secret-456", svc.Config.Tts.DeepInfraApiKey);
+
+        // On-disk file should have encrypted values
+        var json = File.ReadAllText(path);
+        Assert.Contains("enc:", json);
+        Assert.DoesNotContain("sk-secret-key-123", json);
+
+        // Load should decrypt back
+        var svc2 = new JsonConfigService(path);
+        await svc2.LoadAsync();
+        Assert.Equal("sk-secret-key-123", svc2.Config.OpenAiPresets[0].ApiKey);
+        Assert.Equal("di-secret-456", svc2.Config.Tts.DeepInfraApiKey);
+    }
+
+    [Fact]
+    public async Task Load_PlaintextApiKeys_MigratesOnSave()
+    {
+        var path = TempPath();
+        // Write config with plaintext API keys (simulating old format)
+        var json = """
+        {
+            "openAiPresets": [
+                {
+                    "name": "Old",
+                    "apiEndpoint": "https://api.example.com",
+                    "apiKey": "plain-key-789",
+                    "model": "gpt-4"
+                }
+            ],
+            "tts": {
+                "deepInfraApiKey": "plain-di-key"
+            }
+        }
+        """;
+        await File.WriteAllTextAsync(path, json);
+
+        var svc = new JsonConfigService(path);
+        await svc.LoadAsync();
+
+        // Plaintext keys should be readable
+        Assert.Equal("plain-key-789", svc.Config.OpenAiPresets[0].ApiKey);
+        Assert.Equal("plain-di-key", svc.Config.Tts.DeepInfraApiKey);
+
+        // After save, they should be encrypted on disk
+        await svc.SaveAsync();
+        var savedJson = File.ReadAllText(path);
+        Assert.DoesNotContain("plain-key-789", savedJson);
+        Assert.Contains("enc:", savedJson);
+    }
 }

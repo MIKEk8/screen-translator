@@ -23,6 +23,8 @@ public partial class GlobalHotkeyService : IHotkeyService
     private int _nextId = 1;
     private IntPtr _windowHandle;
 
+    public bool Paused { get; set; }
+
     public void SetWindowHandle(IntPtr handle)
     {
         _windowHandle = handle;
@@ -58,6 +60,9 @@ public partial class GlobalHotkeyService : IHotkeyService
 
     public bool HandleMessage(int id)
     {
+        if (Paused)
+            return false;
+
         if (_registeredHotkeys.TryGetValue(id, out var callback))
         {
             callback();
@@ -72,7 +77,60 @@ public partial class GlobalHotkeyService : IHotkeyService
         GC.SuppressFinalize(this);
     }
 
-    private static (uint modifiers, uint vk) ParseHotkey(string hotkey)
+    /// <summary>
+    /// Validates a hotkey string. Returns (isValid, errorMessage).
+    /// </summary>
+    public static (bool IsValid, string? Error) ValidateHotkey(string? hotkey)
+    {
+        if (string.IsNullOrWhiteSpace(hotkey))
+            return (false, "Hotkey cannot be empty");
+
+        var parts = hotkey.Split('+', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0)
+            return (false, "Hotkey cannot be empty");
+
+        bool hasModifier = false;
+        bool hasKey = false;
+
+        foreach (var part in parts)
+        {
+            switch (part.ToUpperInvariant())
+            {
+                case "ALT" or "CTRL" or "CONTROL" or "SHIFT" or "WIN":
+                    hasModifier = true;
+                    break;
+                default:
+                    if (part.Length == 1 && char.IsLetterOrDigit(part[0]))
+                        hasKey = true;
+                    else if (TryParseFunctionKey(part, out _))
+                        hasKey = true;
+                    else
+                        return (false, $"Unknown key: {part}");
+                    break;
+            }
+        }
+
+        if (!hasModifier)
+            return (false, "Hotkey must include a modifier (Alt, Ctrl, Shift, Win)");
+        if (!hasKey)
+            return (false, "Hotkey must include a key (A-Z, 0-9, F1-F12)");
+
+        return (true, null);
+    }
+
+    private static bool TryParseFunctionKey(string part, out uint vk)
+    {
+        vk = 0;
+        var upper = part.ToUpperInvariant();
+        if (upper.Length >= 2 && upper[0] == 'F' && int.TryParse(upper[1..], out var num) && num >= 1 && num <= 12)
+        {
+            vk = (uint)(0x70 + num - 1); // VK_F1 = 0x70
+            return true;
+        }
+        return false;
+    }
+
+    internal static (uint modifiers, uint vk) ParseHotkey(string hotkey)
     {
         uint modifiers = 0;
         uint vk = 0;
@@ -90,6 +148,8 @@ public partial class GlobalHotkeyService : IHotkeyService
                     // Single character key
                     if (part.Length == 1 && char.IsLetterOrDigit(part[0]))
                         vk = (uint)char.ToUpperInvariant(part[0]);
+                    else if (TryParseFunctionKey(part, out var fvk))
+                        vk = fvk;
                     break;
             }
         }

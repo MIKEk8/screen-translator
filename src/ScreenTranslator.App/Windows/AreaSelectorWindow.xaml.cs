@@ -12,6 +12,9 @@ namespace ScreenTranslator.App.Windows;
 
 public partial class AreaSelectorWindow : Window
 {
+    private const int MinSelectionSize = 10;
+    private const double SizeLabelOffset = 4.0;
+
     private Point _startPoint;
     private bool _isSelecting;
     private readonly VirtualDesktopBounds _bounds;
@@ -105,8 +108,7 @@ public partial class AreaSelectorWindow : Window
         var endPoint = e.GetPosition(OverlayCanvas);
         var rect = GetNormalizedRect(_startPoint, endPoint);
 
-        // Minimum size check (10x10 pixels)
-        if (rect.Width < 10 || rect.Height < 10)
+        if (rect.Width < MinSelectionSize || rect.Height < MinSelectionSize)
         {
             SelectedRegion = null;
             DialogResult = false;
@@ -164,7 +166,7 @@ public partial class AreaSelectorWindow : Window
         // Size label — show physical pixel dimensions
         SizeLabelText.Text = $"{(int)(rect.Width * _dpiScaleX)} x {(int)(rect.Height * _dpiScaleY)}";
         Canvas.SetLeft(SizeLabel, rect.X);
-        Canvas.SetTop(SizeLabel, rect.Y + rect.Height + 4);
+        Canvas.SetTop(SizeLabel, rect.Y + rect.Height + SizeLabelOffset);
     }
 
     private static Rect GetNormalizedRect(Point p1, Point p2)

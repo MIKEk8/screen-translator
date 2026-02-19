@@ -88,7 +88,8 @@ public enum TranslationProvider
 public enum TtsProvider
 {
     Sapi5,
-    OpenAiCompatible
+    OpenAiCompatible,
+    DeepInfra
 }
 
 public class HotkeyConfig
@@ -96,6 +97,7 @@ public class HotkeyConfig
     public string CaptureKey { get; set; } = "Alt+A";
     public string StopSpeechKey { get; set; } = "Alt+X";
     public string CopyTranslateKey { get; set; } = "Alt+C";
+    public string ScreenshotKey { get; set; } = "Alt+S";
 }
 
 public class OverlayConfig
@@ -137,6 +139,11 @@ public class TtsConfig
     public string TtsPresetName { get; set; } = "Qwen3-TTS";
     public string TtsModel { get; set; } = "qwen/qwen3-tts";
     public string TtsVoice { get; set; } = "alloy";
+
+    // DeepInfra TTS
+    public string DeepInfraApiKey { get; set; } = "";
+    public string DeepInfraModel { get; set; } = "hexgrad/Kokoro-82M";
+    public string DeepInfraVoice { get; set; } = "af_heart";
 }
 
 public class GestureConfig
@@ -166,6 +173,7 @@ public static class SupportedLanguages
         new("it", "Italian"),
         new("ar", "Arabic"),
         new("uk", "Ukrainian"),
+        new("ka", "Georgian"),
     ];
 }
 

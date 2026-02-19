@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Config;
 using ScreenTranslator.Core.Services.Hotkey;
 using ScreenTranslator.Core.Services.Interfaces;
@@ -18,7 +19,12 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IConfigService, JsonConfigService>();
         services.AddSingleton<IOcrService, OcrRouter>();
         services.AddSingleton<IScreenshotService, ScreenshotService>();
+
+        // Translation DI factories
+        services.AddSingleton<Func<ITranslationService>>(_ => () => new GoogleTranslationService());
+        services.AddSingleton<Func<OpenAiPreset, ITranslationService>>(_ => preset => new OpenAiTranslationService(preset));
         services.AddSingleton<ITranslationService, TranslationRouter>();
+
         services.AddSingleton<SapiTtsService>();
         services.AddSingleton<MultiMonitorService>();
         services.AddSingleton<GlobalHotkeyService>();

@@ -11,7 +11,7 @@ public record TranslationEntry(string Default, string Since);
 /// </summary>
 public static class TranslationKeys
 {
-    public const string CurrentVersion = "1.3.0";
+    public const string CurrentVersion = "1.5.0";
 
     public static readonly Dictionary<string, TranslationEntry> All = new()
     {
@@ -21,7 +21,11 @@ public static class TranslationKeys
         ["nav.preview"]                  = new("Capture Preview", "1.0.0"),
         ["nav.settings"]                 = new("Settings", "1.0.0"),
         ["nav.about"]                    = new("About", "1.0.0"),
+        ["nav.pause_hotkeys"]            = new("Pause hotkeys", "1.4.0"),
+        ["nav.resume_hotkeys"]           = new("Resume hotkeys", "1.4.0"),
         ["tray.show"]                    = new("Show", "1.0.0"),
+        ["tray.pause_hotkeys"]           = new("Pause hotkeys", "1.4.0"),
+        ["tray.resume_hotkeys"]          = new("Resume hotkeys", "1.4.0"),
         ["tray.exit"]                    = new("Exit", "1.0.0"),
         ["app.already_running"]          = new("Screen Translator is already running.", "1.0.0"),
 
@@ -53,6 +57,8 @@ public static class TranslationKeys
         ["status.error"]                 = new("Error: {0}", "1.0.0"),
         ["status.translation_error"]     = new("Translation error: {0}", "1.0.0"),
         ["status.tts_error"]             = new("TTS error: {0}", "1.0.0"),
+        ["status.screenshot_captured"]   = new("Screenshot captured", "1.4.0"),
+        ["screenshot.hint"]              = new("Screenshot — select area with Alt+A or mouse gesture. ESC to close.", "1.4.0"),
 
         // ── Preview page ──
         ["preview.title"]                = new("Capture Preview", "1.0.0"),
@@ -91,6 +97,7 @@ public static class TranslationKeys
         ["settings.tts_preset"]          = new("API Preset", "1.3.0"),
         ["settings.tts_model"]           = new("TTS Model", "1.3.0"),
         ["settings.tts_voice"]           = new("Voice", "1.3.0"),
+        ["settings.tts_deepinfra_title"] = new("DeepInfra TTS Settings", "1.4.0"),
         ["settings.auto_speak"]          = new("Auto-speak translation", "1.0.0"),
         ["settings.test"]                = new("Test", "1.0.0"),
         ["settings.notification_volume"] = new("Notification", "1.1.0"),
@@ -100,6 +107,7 @@ public static class TranslationKeys
         ["settings.hotkey_capture"]      = new("Capture", "1.0.0"),
         ["settings.hotkey_copy"]         = new("Copy & Translate", "1.0.0"),
         ["settings.hotkey_stop"]         = new("Stop Speech", "1.0.0"),
+        ["settings.hotkey_screenshot"]   = new("Screenshot", "1.4.0"),
 
         // ── Settings — Mouse gesture ──
         ["settings.gesture"]             = new("MOUSE GESTURE", "1.1.0"),
@@ -137,6 +145,8 @@ public static class TranslationKeys
         ["about.hotkey_capture"]         = new("Capture screen area and translate", "1.1.0"),
         ["about.hotkey_copy"]            = new("Copy selected text and translate", "1.0.0"),
         ["about.hotkey_stop"]            = new("Stop speech", "1.0.0"),
+        ["about.hotkey_screenshot"]      = new("Screenshot current monitor", "1.5.0"),
+        ["about.whats_new"]             = new("WHAT'S NEW IN v1.5", "1.5.0"),
         ["about.gesture"]                = new("MOUSE GESTURE", "1.1.0"),
         ["about.gesture_desc"]           = new("Hold a mouse side button (XButton) and draw a circle or oval around text on screen. The enclosed area will be captured, recognized, and translated automatically.", "1.1.0"),
         ["about.gesture_config"]         = new("Configure the mouse button and enable/disable in Settings.", "1.1.0"),
@@ -147,6 +157,7 @@ public static class TranslationKeys
         ["about.download"]              = new("Download", "1.1.0"),
         ["about.update"]                = new("Update", "1.1.0"),
         ["about.updating"]              = new("Updating...", "1.1.0"),
+        ["about.extracting"]            = new("Extracting...", "1.5.0"),
         ["about.footer"]                 = new("Personal project", "1.0.0"),
 
         // ── Area selector ──
@@ -159,5 +170,16 @@ public static class TranslationKeys
         ["validation.outdated"]          = new("Outdated (text changed in v{0}):", "1.1.0"),
         ["validation.deprecated"]        = new("Deprecated (can be removed):", "1.1.0"),
         ["validation.yaml_error"]        = new("YAML syntax error at line {0}: {1}", "1.1.0"),
+
+        // ── Settings — DeepInfra test ──
+        ["settings.test_connection"]     = new("Test Connection", "1.5.0"),
+        ["settings.deepinfra_no_key"]    = new("Please enter a DeepInfra API key first", "1.5.0"),
+        ["settings.deepinfra_testing"]   = new("Testing connection...", "1.5.0"),
+        ["settings.deepinfra_ok"]        = new("Connection successful", "1.5.0"),
+        ["settings.deepinfra_fail"]      = new("Connection failed: {0}", "1.5.0"),
+
+        // ── Hotkey validation ──
+        ["settings.hotkey_error_empty"]  = new("Hotkey cannot be empty", "1.5.0"),
+        ["settings.hotkey_error_format"] = new("Invalid hotkey format", "1.5.0"),
     };
 }

@@ -6,4 +6,5 @@ public interface IScreenshotService
 {
     ScreenshotResult CaptureRegion(ScreenRegion region);
     ScreenshotResult CaptureFullScreen();
+    ScreenshotResult CaptureMonitorAtCursor();
 }

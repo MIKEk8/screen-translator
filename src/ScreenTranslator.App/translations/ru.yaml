@@ -5,7 +5,7 @@
 
 language: ru
 language_name: Русский
-version: "1.3.0"
+version: "1.5.0"
 
 # ═══════════════════════════════════════
 # Главное окно
@@ -15,7 +15,11 @@ nav.translate: Перевод
 nav.preview: Предпросмотр
 nav.settings: Настройки
 nav.about: О программе
+nav.pause_hotkeys: Приостановить горячие клавиши
+nav.resume_hotkeys: Возобновить горячие клавиши
 tray.show: Показать
+tray.pause_hotkeys: Приостановить горячие клавиши
+tray.resume_hotkeys: Возобновить горячие клавиши
 tray.exit: Выход
 app.already_running: Screen Translator уже запущен.
 
@@ -51,6 +55,8 @@ status.already_target: Уже на {0} — пропущено
 status.error: "Ошибка: {0}"
 status.translation_error: "Ошибка перевода: {0}"
 status.tts_error: "Ошибка озвучки: {0}"
+status.screenshot_captured: Скриншот сделан
+screenshot.hint: "Скриншот \u2014 выделите область через Alt+A или жест мышью. ESC для закрытия."
 
 # ═══════════════════════════════════════
 # Страница предпросмотра
@@ -93,6 +99,7 @@ settings.tts_openai_title: Настройки OpenAI TTS
 settings.tts_preset: API-пресет
 settings.tts_model: Модель TTS
 settings.tts_voice: Голос
+settings.tts_deepinfra_title: Настройки DeepInfra TTS
 settings.auto_speak: Автоозвучка перевода
 settings.test: Тест
 settings.notification_volume: Уведомление
@@ -102,6 +109,7 @@ settings.hotkeys: ГОРЯЧИЕ КЛАВИШИ
 settings.hotkey_capture: Захват
 settings.hotkey_copy: Копировать и перевести
 settings.hotkey_stop: Остановить озвучку
+settings.hotkey_screenshot: Скриншот
 
 # Жест мышью
 settings.gesture: ЖЕСТ МЫШЬЮ
@@ -141,6 +149,8 @@ about.hotkeys: ГОРЯЧИЕ КЛАВИШИ
 about.hotkey_capture: Захват области экрана и перевод
 about.hotkey_copy: Копировать выделенный текст и перевести
 about.hotkey_stop: Остановить озвучку
+about.hotkey_screenshot: Скриншот текущего монитора
+about.whats_new: "ЧТО НОВОГО В v1.5"
 about.gesture: ЖЕСТ МЫШЬЮ
 about.gesture_desc: Удерживайте боковую кнопку мыши (XButton) и обведите текст на экране кругом или овалом. Выделенная область будет захвачена, распознана и переведена автоматически.
 about.gesture_config: Настроить кнопку мыши и включить/выключить можно в Настройках.
@@ -151,6 +161,7 @@ about.update_error: Не удалось проверить обновления
 about.download: Скачать
 about.update: Обновить
 about.updating: Обновление...
+about.extracting: Распаковка...
 about.footer: Персональный проект
 
 # ═══════════════════════════════════════
@@ -167,3 +178,15 @@ validation.missing: "Отсутствуют (не переведены):"
 validation.outdated: "Устаревшие (текст изменён в v{0}):"
 validation.deprecated: "Устаревшие (можно удалить):"
 validation.yaml_error: "Ошибка YAML-синтаксиса в строке {0}: {1}"
+
+# Тест DeepInfra
+settings.test_connection: Проверить подключение
+settings.deepinfra_no_key: Сначала введите API-ключ DeepInfra
+settings.deepinfra_testing: Проверка подключения...
+settings.deepinfra_ok: Подключение успешно
+# {0} = ошибка/код статуса
+settings.deepinfra_fail: "Ошибка подключения: {0}"
+
+# Валидация горячих клавиш
+settings.hotkey_error_empty: Горячая клавиша не может быть пустой
+settings.hotkey_error_format: Неверный формат горячей клавиши

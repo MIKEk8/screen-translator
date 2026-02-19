@@ -88,6 +88,31 @@ public partial class App : Application
                         });
                     },
                     isAudioPlaying: () => ttsPlaying));
+            serviceCollection.AddSingleton(sp =>
+                new DeepInfraTtsService(
+                    sp.GetRequiredService<IConfigService>(),
+                    playAudioFile: path =>
+                    {
+                        Current.Dispatcher.Invoke(() =>
+                        {
+                            ttsPlayer ??= new MediaPlayer();
+                            ttsPlayer.Stop();
+                            ttsPlayer.Open(new Uri(path));
+                            ttsPlaying = true;
+                            ttsPlayer.MediaEnded += (_, _) => ttsPlaying = false;
+                            ttsPlayer.MediaFailed += (_, _) => ttsPlaying = false;
+                            ttsPlayer.Play();
+                        });
+                    },
+                    stopAudio: () =>
+                    {
+                        Current.Dispatcher.Invoke(() =>
+                        {
+                            ttsPlayer?.Stop();
+                            ttsPlaying = false;
+                        });
+                    },
+                    isAudioPlaying: () => ttsPlaying));
             serviceCollection.AddSingleton<ITtsService, TtsRouter>();
 
             serviceCollection.AddTransient<SettingsViewModel>();

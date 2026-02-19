@@ -66,6 +66,7 @@ public class AppConfigTests
         Assert.Equal("Alt+A", config.Hotkey.CaptureKey);
         Assert.Equal("Alt+C", config.Hotkey.CopyTranslateKey);
         Assert.Equal("Alt+X", config.Hotkey.StopSpeechKey);
+        Assert.Equal("Alt+S", config.Hotkey.ScreenshotKey);
         Assert.Equal(0.9, config.Overlay.Opacity);
         Assert.True(config.Overlay.ShowOnTranslate);
         Assert.True(config.Gesture.Enabled);

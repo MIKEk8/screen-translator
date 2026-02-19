@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using ScreenTranslator.Core.Models;
+using ScreenTranslator.Core.Services.Hotkey;
 using ScreenTranslator.Core.Services.Interfaces;
 using ScreenTranslator.Core.Services.Localization;
 
@@ -46,6 +47,21 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private string _stopSpeechHotkey = "Alt+X";
+
+    [ObservableProperty]
+    private string _screenshotHotkey = "Alt+S";
+
+    [ObservableProperty]
+    private string _captureHotkeyError = "";
+
+    [ObservableProperty]
+    private string _copyTranslateHotkeyError = "";
+
+    [ObservableProperty]
+    private string _stopSpeechHotkeyError = "";
+
+    [ObservableProperty]
+    private string _screenshotHotkeyError = "";
 
     [ObservableProperty]
     private double _overlayOpacity;
@@ -139,6 +155,16 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _ttsVoice = "alloy";
 
+    // DeepInfra TTS
+    [ObservableProperty]
+    private string _deepInfraApiKey = "";
+
+    [ObservableProperty]
+    private string _deepInfraModel = "hexgrad/Kokoro-82M";
+
+    [ObservableProperty]
+    private string _deepInfraVoice = "af_heart";
+
     [ObservableProperty]
     private int _notificationVolume = 100;
 
@@ -194,6 +220,7 @@ public partial class SettingsViewModel : ObservableObject
         CaptureHotkey = cfg.Hotkey.CaptureKey;
         CopyTranslateHotkey = cfg.Hotkey.CopyTranslateKey;
         StopSpeechHotkey = cfg.Hotkey.StopSpeechKey;
+        ScreenshotHotkey = cfg.Hotkey.ScreenshotKey;
         OverlayOpacity = cfg.Overlay.Opacity;
         OverlayFontSize = cfg.Overlay.FontSize;
         ShowOverlayOnTranslate = cfg.Overlay.ShowOnTranslate;
@@ -213,6 +240,9 @@ public partial class SettingsViewModel : ObservableObject
         TtsPresetName = cfg.Tts.TtsPresetName;
         TtsModel = cfg.Tts.TtsModel;
         TtsVoice = cfg.Tts.TtsVoice;
+        DeepInfraApiKey = cfg.Tts.DeepInfraApiKey;
+        DeepInfraModel = cfg.Tts.DeepInfraModel;
+        DeepInfraVoice = cfg.Tts.DeepInfraVoice;
 
         NotificationVolume = cfg.NotificationVolume;
         StartMinimized = cfg.StartMinimized;
@@ -408,9 +438,10 @@ public partial class SettingsViewModel : ObservableObject
 
     partial void OnSelectedProviderChanged(TranslationProvider value) => ScheduleAutoSave();
     partial void OnSelectedOcrEngineChanged(OcrEngine value) => ScheduleAutoSave();
-    partial void OnCaptureHotkeyChanged(string value) => ScheduleAutoSave();
-    partial void OnCopyTranslateHotkeyChanged(string value) => ScheduleAutoSave();
-    partial void OnStopSpeechHotkeyChanged(string value) => ScheduleAutoSave();
+    partial void OnCaptureHotkeyChanged(string value) { ValidateHotkeyField(value, v => CaptureHotkeyError = v); ScheduleAutoSave(); }
+    partial void OnCopyTranslateHotkeyChanged(string value) { ValidateHotkeyField(value, v => CopyTranslateHotkeyError = v); ScheduleAutoSave(); }
+    partial void OnStopSpeechHotkeyChanged(string value) { ValidateHotkeyField(value, v => StopSpeechHotkeyError = v); ScheduleAutoSave(); }
+    partial void OnScreenshotHotkeyChanged(string value) { ValidateHotkeyField(value, v => ScreenshotHotkeyError = v); ScheduleAutoSave(); }
     partial void OnOverlayOpacityChanged(double value) => ScheduleAutoSave();
     partial void OnOverlayFontSizeChanged(int value) => ScheduleAutoSave();
     partial void OnShowOverlayOnTranslateChanged(bool value) => ScheduleAutoSave();
@@ -439,6 +470,9 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnTtsPresetNameChanged(string value) => ScheduleAutoSave();
     partial void OnTtsModelChanged(string value) => ScheduleAutoSave();
     partial void OnTtsVoiceChanged(string value) => ScheduleAutoSave();
+    partial void OnDeepInfraApiKeyChanged(string value) => ScheduleAutoSave();
+    partial void OnDeepInfraModelChanged(string value) => ScheduleAutoSave();
+    partial void OnDeepInfraVoiceChanged(string value) => ScheduleAutoSave();
     partial void OnNotificationVolumeChanged(int value) => ScheduleAutoSave();
     partial void OnAutostartEnabledChanged(bool value)
     {
@@ -515,6 +549,38 @@ public partial class SettingsViewModel : ObservableObject
             MessageBoxButton.OK, MessageBoxImage.Warning);
     }
 
+    private static void ValidateHotkeyField(string value, Action<string> setError)
+    {
+        var (isValid, error) = GlobalHotkeyService.ValidateHotkey(value);
+        setError(isValid ? "" : error ?? "");
+    }
+
+    [RelayCommand]
+    private async Task TestDeepInfraAsync()
+    {
+        if (string.IsNullOrWhiteSpace(DeepInfraApiKey))
+        {
+            StatusMessage = _locService.T("settings.deepinfra_no_key");
+            return;
+        }
+
+        StatusMessage = _locService.T("settings.deepinfra_testing");
+        try
+        {
+            using var http = new HttpClient();
+            http.DefaultRequestHeaders.Add("Authorization", $"Bearer {DeepInfraApiKey}");
+            var response = await http.GetAsync("https://api.deepinfra.com/v1/models");
+            if (response.IsSuccessStatusCode)
+                StatusMessage = _locService.T("settings.deepinfra_ok");
+            else
+                StatusMessage = _locService.T("settings.deepinfra_fail", (int)response.StatusCode);
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = _locService.T("settings.deepinfra_fail", ex.Message);
+        }
+    }
+
     private async Task PersistAsync()
     {
         var cfg = _configService.Config;
@@ -524,6 +590,7 @@ public partial class SettingsViewModel : ObservableObject
         cfg.Hotkey.CaptureKey = CaptureHotkey;
         cfg.Hotkey.CopyTranslateKey = CopyTranslateHotkey;
         cfg.Hotkey.StopSpeechKey = StopSpeechHotkey;
+        cfg.Hotkey.ScreenshotKey = ScreenshotHotkey;
         cfg.Overlay.Opacity = OverlayOpacity;
         cfg.Overlay.FontSize = OverlayFontSize;
         cfg.Overlay.ShowOnTranslate = ShowOverlayOnTranslate;
@@ -538,6 +605,9 @@ public partial class SettingsViewModel : ObservableObject
         cfg.Tts.TtsPresetName = TtsPresetName;
         cfg.Tts.TtsModel = TtsModel;
         cfg.Tts.TtsVoice = TtsVoice;
+        cfg.Tts.DeepInfraApiKey = DeepInfraApiKey;
+        cfg.Tts.DeepInfraModel = DeepInfraModel;
+        cfg.Tts.DeepInfraVoice = DeepInfraVoice;
 
         cfg.NotificationVolume = NotificationVolume;
         cfg.StartMinimized = StartMinimized;
@@ -566,6 +636,9 @@ public partial class SettingsViewModel : ObservableObject
         var prevTtsPreset = cfg.Tts.TtsPresetName;
         var prevTtsModel = cfg.Tts.TtsModel;
         var prevTtsVoice = cfg.Tts.TtsVoice;
+        var prevDiKey = cfg.Tts.DeepInfraApiKey;
+        var prevDiModel = cfg.Tts.DeepInfraModel;
+        var prevDiVoice = cfg.Tts.DeepInfraVoice;
 
         cfg.Tts.Provider = SelectedTtsProvider;
         cfg.Tts.VoiceName = SelectedVoice;
@@ -574,6 +647,9 @@ public partial class SettingsViewModel : ObservableObject
         cfg.Tts.TtsPresetName = TtsPresetName;
         cfg.Tts.TtsModel = TtsModel;
         cfg.Tts.TtsVoice = TtsVoice;
+        cfg.Tts.DeepInfraApiKey = DeepInfraApiKey;
+        cfg.Tts.DeepInfraModel = DeepInfraModel;
+        cfg.Tts.DeepInfraVoice = DeepInfraVoice;
 
         try
         {
@@ -589,6 +665,9 @@ public partial class SettingsViewModel : ObservableObject
             cfg.Tts.TtsPresetName = prevTtsPreset;
             cfg.Tts.TtsModel = prevTtsModel;
             cfg.Tts.TtsVoice = prevTtsVoice;
+            cfg.Tts.DeepInfraApiKey = prevDiKey;
+            cfg.Tts.DeepInfraModel = prevDiModel;
+            cfg.Tts.DeepInfraVoice = prevDiVoice;
         }
     }
 

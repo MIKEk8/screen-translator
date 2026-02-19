@@ -410,6 +410,74 @@
                         </Border>
                     </StackPanel>
 
+                    <!-- DeepInfra TTS section -->
+                    <StackPanel Margin="0,0,0,8">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedTtsProvider}" Value="DeepInfra">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+
+                        <Border Background="{StaticResource BgTertiaryBrush}" CornerRadius="8"
+                                Padding="14" Margin="0,0,0,4">
+                            <StackPanel>
+                                <TextBlock x:Name="TtsDeepInfraTitle" Text="DeepInfra TTS Settings"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10"/>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="DeepInfraApiKeyText" Text="API Key"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding DeepInfraApiKey, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="DeepInfraModelText" Text="Model"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding DeepInfraModel, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
+                                </Grid>
+
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="DeepInfraVoiceText" Text="Voice"
+                                               Foreground="{StaticResource TextSecondaryBrush}"
+                                               VerticalAlignment="Center" FontSize="12"/>
+                                    <TextBox Grid.Column="1"
+                                             Text="{Binding DeepInfraVoice, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource DarkTextBox}" FontSize="12" Padding="8,6"/>
+                                </Grid>
+
+                                <Button x:Name="TestDeepInfraBtn" Content="Test Connection"
+                                        Command="{Binding TestDeepInfraCommand}"
+                                        Style="{StaticResource AccentButton}"
+                                        Background="{StaticResource BgTertiaryBrush}"
+                                        Padding="14,6" FontSize="12" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
                     <!-- Common: Auto-speak + Test -->
                     <Grid Margin="0,0,0,12">
                         <CheckBox x:Name="AutoSpeakCheckBox" Content="Auto-speak translation"
@@ -449,7 +517,7 @@
                     <TextBlock x:Name="HotkeysSectionText" Text="HOTKEYS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"
                                Margin="0,0,0,14"/>
 
-                    <Grid Margin="0,0,0,10">
+                    <Grid Margin="0,0,0,2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="120"/>
@@ -459,8 +527,9 @@
                         <TextBox Grid.Column="1" Text="{Binding CaptureHotkey, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource DarkTextBox}" FontSize="13" Padding="8,6"/>
                     </Grid>
+                    <TextBlock x:Name="CaptureHotkeyErrorText" Text="{Binding CaptureHotkeyError}" Foreground="#e74c3c" FontSize="11" Margin="0,0,0,8"/>
 
-                    <Grid Margin="0,0,0,10">
+                    <Grid Margin="0,0,0,2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="120"/>
@@ -470,8 +539,9 @@
                         <TextBox Grid.Column="1" Text="{Binding CopyTranslateHotkey, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource DarkTextBox}" FontSize="13" Padding="8,6"/>
                     </Grid>
+                    <TextBlock x:Name="CopyTranslateHotkeyErrorText" Text="{Binding CopyTranslateHotkeyError}" Foreground="#e74c3c" FontSize="11" Margin="0,0,0,8"/>
 
-                    <Grid>
+                    <Grid Margin="0,0,0,2">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="120"/>
@@ -481,6 +551,19 @@
                         <TextBox Grid.Column="1" Text="{Binding StopSpeechHotkey, UpdateSourceTrigger=PropertyChanged}"
                                  Style="{StaticResource DarkTextBox}" FontSize="13" Padding="8,6"/>
                     </Grid>
+                    <TextBlock x:Name="StopSpeechHotkeyErrorText" Text="{Binding StopSpeechHotkeyError}" Foreground="#e74c3c" FontSize="11" Margin="0,0,0,8"/>
+
+                    <Grid Margin="0,0,0,2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="HotkeyScreenshotText" Text="Screenshot" Foreground="{StaticResource TextSecondaryBrush}"
+                                   VerticalAlignment="Center" FontSize="13"/>
+                        <TextBox Grid.Column="1" Text="{Binding ScreenshotHotkey, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource DarkTextBox}" FontSize="13" Padding="8,6"/>
+                    </Grid>
+                    <TextBlock x:Name="ScreenshotHotkeyErrorText" Text="{Binding ScreenshotHotkeyError}" Foreground="#e74c3c" FontSize="11" Margin="0,0,0,8"/>
                 </StackPanel>
             </Border>
 

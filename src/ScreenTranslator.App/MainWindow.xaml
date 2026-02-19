@@ -51,40 +51,49 @@
                 <!-- Sidebar -->
                 <Border Grid.Column="0" Background="{StaticResource BgSecondaryBrush}"
                         CornerRadius="0,0,0,16" Padding="6,12,6,6">
-                    <StackPanel>
-                        <Button x:Name="NavTranslate" Content="&#x1F4DD;"
-                                ToolTip="Translate"
-                                Style="{StaticResource NavButtonActive}"
-                                Click="NavTranslate_Click"
-                                HorizontalContentAlignment="Center"
-                                Padding="0,10" FontSize="20" Margin="0,0,0,4"/>
-                        <Button x:Name="NavPreview" Content="&#x1F5BC;"
-                                ToolTip="Capture Preview"
+                    <DockPanel LastChildFill="False">
+                        <StackPanel DockPanel.Dock="Top">
+                            <Button x:Name="NavTranslate" Content="&#x1F4DD;"
+                                    ToolTip="Translate"
+                                    Style="{StaticResource NavButtonActive}"
+                                    Click="NavTranslate_Click"
+                                    HorizontalContentAlignment="Center"
+                                    Padding="0,10" FontSize="20" Margin="0,0,0,4"/>
+                            <Button x:Name="NavPreview" Content="&#x1F5BC;"
+                                    ToolTip="Capture Preview"
+                                    Style="{StaticResource NavButton}"
+                                    Click="NavPreview_Click"
+                                    HorizontalContentAlignment="Center"
+                                    Padding="0,10" FontSize="20" Margin="0,0,0,4"
+                                    Visibility="Collapsed"/>
+                            <Button x:Name="NavSettings" Content="&#x2699;"
+                                    ToolTip="Settings"
+                                    Style="{StaticResource NavButton}"
+                                    Click="NavSettings_Click"
+                                    HorizontalContentAlignment="Center"
+                                    Padding="0,10" FontSize="20" Margin="0,0,0,4"/>
+                            <Button x:Name="NavAbout"
+                                    ToolTip="About"
+                                    Style="{StaticResource NavButton}"
+                                    Click="NavAbout_Click"
+                                    HorizontalContentAlignment="Center"
+                                    Padding="0,10" FontSize="20">
+                                <Grid>
+                                    <TextBlock Text="&#x2139;" FontSize="20" HorizontalAlignment="Center"/>
+                                    <Ellipse x:Name="UpdateBadge" Width="8" Height="8"
+                                             Fill="#4ade80" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                             Margin="0,-2,-2,0" Visibility="Collapsed"/>
+                                </Grid>
+                            </Button>
+                        </StackPanel>
+                        <Button x:Name="NavPause" Content="&#x23F8;"
+                                ToolTip="Pause hotkeys"
+                                DockPanel.Dock="Bottom"
                                 Style="{StaticResource NavButton}"
-                                Click="NavPreview_Click"
+                                Click="NavPause_Click"
                                 HorizontalContentAlignment="Center"
-                                Padding="0,10" FontSize="20" Margin="0,0,0,4"
-                                Visibility="Collapsed"/>
-                        <Button x:Name="NavSettings" Content="&#x2699;"
-                                ToolTip="Settings"
-                                Style="{StaticResource NavButton}"
-                                Click="NavSettings_Click"
-                                HorizontalContentAlignment="Center"
-                                Padding="0,10" FontSize="20" Margin="0,0,0,4"/>
-                        <Button x:Name="NavAbout"
-                                ToolTip="About"
-                                Style="{StaticResource NavButton}"
-                                Click="NavAbout_Click"
-                                HorizontalContentAlignment="Center"
-                                Padding="0,10" FontSize="20">
-                            <Grid>
-                                <TextBlock Text="&#x2139;" FontSize="20" HorizontalAlignment="Center"/>
-                                <Ellipse x:Name="UpdateBadge" Width="8" Height="8"
-                                         Fill="#4ade80" HorizontalAlignment="Right" VerticalAlignment="Top"
-                                         Margin="0,-2,-2,0" Visibility="Collapsed"/>
-                            </Grid>
-                        </Button>
-                    </StackPanel>
+                                Padding="0,10" FontSize="20" Margin="0,4,0,0"/>
+                    </DockPanel>
                 </Border>
 
                 <!-- Content Frame -->

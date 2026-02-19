@@ -57,6 +57,8 @@ public class GlobalMouseHookService : IDisposable
     private bool _reinjecting;
     private readonly Func<GestureConfig> _getConfig;
 
+    public bool Paused { get; set; }
+
     public event Action<double, double>? GestureStarted;
     public event Action<double, double>? GesturePointAdded;
     public event Action<ScreenRegion>? GestureCompleted;
@@ -83,6 +85,9 @@ public class GlobalMouseHookService : IDisposable
 
         // Pass through our own re-injected events
         if (_reinjecting)
+            return CallNextHookEx(_hookId, nCode, wParam, lParam);
+
+        if (Paused)
             return CallNextHookEx(_hookId, nCode, wParam, lParam);
 
         var config = _getConfig();

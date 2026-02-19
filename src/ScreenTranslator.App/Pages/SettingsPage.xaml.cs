@@ -62,6 +62,11 @@ public partial class SettingsPage : Page
         TtsPresetText.Text = _loc.T("settings.tts_preset");
         TtsModelText.Text = _loc.T("settings.tts_model");
         TtsVoiceText.Text = _loc.T("settings.tts_voice");
+        TtsDeepInfraTitle.Text = _loc.T("settings.tts_deepinfra_title");
+        DeepInfraApiKeyText.Text = _loc.T("settings.api_key");
+        DeepInfraModelText.Text = _loc.T("settings.model");
+        DeepInfraVoiceText.Text = _loc.T("settings.tts_voice");
+        TestDeepInfraBtn.Content = _loc.T("settings.test_connection");
         AutoSpeakCheckBox.Content = _loc.T("settings.auto_speak");
         TestVoiceBtn.Content = $"\u25B6 {_loc.T("settings.test")}";
 
@@ -71,6 +76,7 @@ public partial class SettingsPage : Page
         HotkeyCaptureText.Text = _loc.T("settings.hotkey_capture");
         HotkeyCopyText.Text = _loc.T("settings.hotkey_copy");
         HotkeyStopText.Text = _loc.T("settings.hotkey_stop");
+        HotkeyScreenshotText.Text = _loc.T("settings.hotkey_screenshot");
 
         GestureSectionText.Text = _loc.T("settings.gesture");
         GestureEnableCheckBox.Content = _loc.T("settings.gesture_enable");

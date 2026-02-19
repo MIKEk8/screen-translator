@@ -32,17 +32,22 @@ public partial class MainWindow : Window
     private string _currentPage = "translate";
 
     private Forms.NotifyIcon? _trayIcon;
+    private Forms.ToolStripMenuItem? _pauseMenuItem;
     private Drawing.Icon? _originalTrayIcon;
     private bool _forceClose;
     private bool _disposed;
+    private bool _hotkeysPaused;
 
     public static UpdateInfo? AvailableUpdate { get; internal set; }
 
     private GlobalMouseHookService? _mouseHookService;
     private GestureTrailWindow? _gestureTrailWindow;
+    private ScreenshotPreviewWindow? _screenshotPreview;
 
     private const int WM_HOTKEY = 0x0312;
     private const uint KEYEVENTF_KEYUP = 0x0002;
+    private const int BadgeIconSize = 10;
+    private const int BadgeIconMargin = 1;
 
     [DllImport("user32.dll")]
     private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
@@ -106,13 +111,16 @@ public partial class MainWindow : Window
         NavPreview.ToolTip = _loc.T("nav.preview");
         NavSettings.ToolTip = _loc.T("nav.settings");
         NavAbout.ToolTip = _loc.T("nav.about");
+        NavPause.ToolTip = _loc.T(_hotkeysPaused ? "nav.resume_hotkeys" : "nav.pause_hotkeys");
 
         // Update tray menu
         if (_trayIcon?.ContextMenuStrip is { } menu)
         {
             menu.Items[0].Text = _loc.T("translate.capture");
             menu.Items[1].Text = _loc.T("tray.show");
-            menu.Items[3].Text = _loc.T("tray.exit");
+            if (_pauseMenuItem is not null)
+                _pauseMenuItem.Text = _loc.T(_hotkeysPaused ? "tray.resume_hotkeys" : "tray.pause_hotkeys");
+            menu.Items[4].Text = _loc.T("tray.exit");
         }
     }
 
@@ -136,6 +144,9 @@ public partial class MainWindow : Window
         var contextMenu = new Forms.ContextMenuStrip();
         contextMenu.Items.Add("Capture", null, (_, _) => Dispatcher.Invoke(HandleCaptureHotkey));
         contextMenu.Items.Add("Show", null, (_, _) => ShowFromTray());
+        _pauseMenuItem = new Forms.ToolStripMenuItem("Pause hotkeys");
+        _pauseMenuItem.Click += (_, _) => Dispatcher.Invoke(TogglePause);
+        contextMenu.Items.Add(_pauseMenuItem);
         contextMenu.Items.Add("-");
         contextMenu.Items.Add("Exit", null, (_, _) =>
         {
@@ -197,6 +208,14 @@ public partial class MainWindow : Window
         }
         catch { }
 
+        try
+        {
+            _hotkeyService.Register(
+                _configService.Config.Hotkey.ScreenshotKey,
+                () => Dispatcher.Invoke(HandleScreenshotHotkey));
+        }
+        catch { }
+
         // Start background update checker
         UpdateChecker.Start(info => Dispatcher.Invoke(() => OnUpdateChecked(info)));
 
@@ -225,18 +244,29 @@ public partial class MainWindow : Window
 
     private async void OnGestureCompleted(ScreenRegion region)
     {
-        _gestureTrailWindow?.HideTrail();
-        await Task.Delay(50); // let the trail window disappear before capture
+        try
+        {
+            _gestureTrailWindow?.HideTrail();
+            await Task.Delay(50); // let the trail window disappear before capture
 
-        FeedbackSound.Play();
+            FeedbackSound.Play();
 
-        Log.Information("Gesture completed: {Region}", region);
+            Log.Information("Gesture completed: {Region}", region);
 
-        _translatePage ??= new TranslatePage();
-        NavigateTo("translate");
+            var screenshot = _screenshotService.CaptureRegion(region);
 
-        var screenshot = _screenshotService.CaptureRegion(region);
-        _translatePage.ProcessScreenshot(screenshot);
+            // Close screenshot preview after capture (so we captured its pixels)
+            CloseScreenshotPreview();
+
+            _translatePage ??= new TranslatePage();
+            NavigateTo("translate");
+
+            _translatePage.ProcessScreenshot(screenshot);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Gesture completed handler failed");
+        }
     }
 
     private void OnGestureCancelled()
@@ -285,11 +315,10 @@ public partial class MainWindow : Window
     {
         using var bitmap = original.ToBitmap();
         using var g = Drawing.Graphics.FromImage(bitmap);
-        var size = 10;
-        var x = bitmap.Width - size - 1;
-        var y = bitmap.Height - size - 1;
+        var x = bitmap.Width - BadgeIconSize - BadgeIconMargin;
+        var y = bitmap.Height - BadgeIconSize - BadgeIconMargin;
         using var brush = new Drawing.SolidBrush(Drawing.Color.FromArgb(74, 222, 128));
-        g.FillEllipse(brush, x, y, size, size);
+        g.FillEllipse(brush, x, y, BadgeIconSize, BadgeIconSize);
         return Drawing.Icon.FromHandle(bitmap.GetHicon());
     }
 
@@ -302,8 +331,43 @@ public partial class MainWindow : Window
     private void HandleCaptureHotkey()
     {
         _translatePage ??= new TranslatePage();
-        _translatePage.StartAreaCapture();
+        _translatePage.StartAreaCapture(closeAction: CloseScreenshotPreview);
     }
+
+    private void HandleScreenshotHotkey()
+    {
+        // Close previous preview if open
+        _screenshotPreview?.Close();
+
+        var screenshot = _screenshotService.CaptureMonitorAtCursor();
+        _screenshotPreview = new ScreenshotPreviewWindow(screenshot);
+        _screenshotPreview.Closed += (_, _) => _screenshotPreview = null;
+        _screenshotPreview.Show();
+    }
+
+    internal void CloseScreenshotPreview()
+    {
+        _screenshotPreview?.Close();
+    }
+
+    private void TogglePause()
+    {
+        _hotkeysPaused = !_hotkeysPaused;
+        _hotkeyService.Paused = _hotkeysPaused;
+        if (_mouseHookService is not null)
+            _mouseHookService.Paused = _hotkeysPaused;
+
+        NavPause.Content = _hotkeysPaused ? "\u25B6" : "\u23F8";
+        NavPause.ToolTip = _loc.T(_hotkeysPaused ? "nav.resume_hotkeys" : "nav.pause_hotkeys");
+
+        if (_pauseMenuItem is not null)
+        {
+            _pauseMenuItem.Text = _loc.T(_hotkeysPaused ? "tray.resume_hotkeys" : "tray.pause_hotkeys");
+            _pauseMenuItem.Checked = _hotkeysPaused;
+        }
+    }
+
+    private void NavPause_Click(object sender, RoutedEventArgs e) => TogglePause();
 
     private void NavigateTo(string page)
     {

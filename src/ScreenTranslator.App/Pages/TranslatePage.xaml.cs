@@ -10,7 +10,6 @@ using ScreenTranslator.App.Windows;
 using ScreenTranslator.Core.Models;
 using ScreenTranslator.Core.Services.Interfaces;
 using ScreenTranslator.Core.Services.Localization;
-using ScreenTranslator.Core.Services.Translation;
 using Serilog;
 
 namespace ScreenTranslator.App.Pages;
@@ -25,14 +24,19 @@ public partial class TranslatePage : Page
     private const byte VK_C = 0x43;
     private const uint KEYEVENTF_KEYUP = 0x0002;
 
+    private const double ScriptDetectionThreshold = 0.6;
+    private const int MinCharsForScriptDetection = 3;
+
     private readonly IOcrService _ocrService;
     private readonly ITranslationService _translationService;
     private readonly IScreenshotService _screenshotService;
     private readonly IConfigService _configService;
     private readonly ITtsService _ttsService;
     private readonly ILocalizationService _loc;
+    private readonly Func<OpenAiPreset, ITranslationService> _openAiFactory;
 
     private bool _isLoading;
+    private bool _isTranslating;
     private byte[]? _lastScreenshot;
 
     private record ProviderOption(string Label, TranslationProvider Provider, string? PresetName = null)
@@ -59,6 +63,7 @@ public partial class TranslatePage : Page
         _configService = App.Services.GetRequiredService<IConfigService>();
         _ttsService = App.Services.GetRequiredService<ITtsService>();
         _loc = App.Services.GetRequiredService<ILocalizationService>();
+        _openAiFactory = App.Services.GetRequiredService<Func<OpenAiPreset, ITranslationService>>();
 
         var langCodes = SupportedLanguages.All.Select(l => l.Code.ToUpperInvariant()).ToList();
         SourceLangCombo.ItemsSource = langCodes;
@@ -176,7 +181,7 @@ public partial class TranslatePage : Page
         await _configService.SaveAsync();
     }
 
-    public async void StartAreaCapture()
+    public async void StartAreaCapture(Action? closeAction = null)
     {
         var mainWindow = Application.Current.MainWindow;
         if (mainWindow is null) return;
@@ -190,19 +195,28 @@ public partial class TranslatePage : Page
 
         if (result == true && selector.SelectedRegion is { } region)
         {
-            // Capture BEFORE restoring main window
+            // Capture BEFORE restoring main window (but after screenshot preview is still visible)
             var screenshot = _screenshotService.CaptureRegion(region);
+
+            // Close screenshot preview after capture
+            closeAction?.Invoke();
+
             mainWindow.WindowState = prevState;
             await OcrAndTranslate(screenshot);
         }
         else
         {
+            closeAction?.Invoke();
             mainWindow.WindowState = prevState;
         }
     }
 
     private async Task OcrAndTranslate(ScreenshotResult screenshot)
     {
+        if (_isTranslating) return;
+        _isTranslating = true;
+        CaptureButton.IsEnabled = false;
+        TranslateButton.IsEnabled = false;
         try
         {
             var config = _configService.Config;
@@ -217,7 +231,7 @@ public partial class TranslatePage : Page
                     .FirstOrDefault(p => p.Name == config.ActiveOcrPreset && p.UseVision)
                     ?? throw new InvalidOperationException("Vision preset not found");
 
-                var visionService = new OpenAiTranslationService(visionPreset);
+                var visionService = _openAiFactory(visionPreset);
                 var sw = Stopwatch.StartNew();
                 var result = await visionService.TranslateImageAsync(
                     screenshot.ImageData,
@@ -260,6 +274,12 @@ public partial class TranslatePage : Page
         {
             Log.Error(ex, "OCR/translate failed");
             StatusText.Text = _loc.T("status.error", ex.Message);
+        }
+        finally
+        {
+            _isTranslating = false;
+            CaptureButton.IsEnabled = true;
+            TranslateButton.IsEnabled = true;
         }
     }
 
@@ -324,9 +344,9 @@ public partial class TranslatePage : Page
             else if (ch is (>= '\u3040' and <= '\u309F') or (>= '\u30A0' and <= '\u30FF')) kana++;
         }
 
-        if (total < 3) return null;
+        if (total < MinCharsForScriptDetection) return null;
 
-        var threshold = total * 0.6;
+        var threshold = total * ScriptDetectionThreshold;
         if (cyrillic > threshold) return "ru";
         if (kana > threshold || (cjk > 0 && kana > 0 && cjk + kana > threshold)) return "ja";
         if (cjk > threshold) return "zh";
@@ -402,6 +422,12 @@ public partial class TranslatePage : Page
         await OcrAndTranslate(screenshot);
     }
 
+    public void ShowScreenshotOnly(ScreenshotResult screenshot)
+    {
+        ShowSourceImage(screenshot.ImageData);
+        StatusText.Text = _loc.T("status.screenshot_captured");
+    }
+
     private void ShowSourceImage(byte[] imageData)
     {
         _lastScreenshot = imageData;
@@ -420,6 +446,8 @@ public partial class TranslatePage : Page
 
     private void ShowSourceText()
     {
+        _lastScreenshot = null;
+        SourceImage.Source = null;
         SourceImagePanel.Visibility = Visibility.Collapsed;
         SourceTextBox.Visibility = Visibility.Visible;
     }

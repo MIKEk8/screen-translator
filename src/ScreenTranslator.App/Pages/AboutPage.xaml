@@ -71,6 +71,60 @@
                                 Style="{StaticResource AccentButton}"
                                 Padding="14,6" FontSize="12" Margin="8,0,0,0"/>
                     </StackPanel>
+
+                    <Grid x:Name="DownloadProgressPanel" Visibility="Collapsed" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <ProgressBar x:Name="DownloadProgressBar" Height="6" Minimum="0" Maximum="100"
+                                     Background="{StaticResource BgTertiaryBrush}"
+                                     Foreground="{StaticResource AccentBrush}"
+                                     VerticalAlignment="Center"/>
+                        <TextBlock x:Name="DownloadProgressText" Grid.Column="1"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"
+                                   VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- What's New -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock x:Name="WhatsNewSectionText" Text="WHAT'S NEW IN v1.5" FontSize="11" FontWeight="Bold"
+                               Foreground="{StaticResource AccentBrush}" Margin="0,0,0,12"/>
+
+                    <TextBlock x:Name="WhatsNewText" Foreground="{StaticResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap">
+                        <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">v1.5.0</Run>
+                        <Run>— Security, architecture &amp; UX</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; API keys encrypted at rest (DPAPI)</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; Hotkey validation with error hints</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; F1–F12 function keys support in hotkeys</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; DeepInfra TTS connection test button</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; Translation throttle &amp; memory leak fix</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; DI factories for translation providers</Run>
+                        <LineBreak/><LineBreak/>
+                        <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">v1.4.0</Run>
+                        <Run>— TTS &amp; screenshot</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; OpenAI-compatible &amp; DeepInfra TTS providers</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; Screenshot hotkey (Alt+S) with preview window</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; Gesture passthrough &amp; pause/resume hotkeys</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; Auto-update, autostart, start minimized</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; Notification volume control</Run>
+                        <LineBreak/>
+                        <Run>&#x2022; Reset settings confirmation dialog</Run>
+                    </TextBlock>
                 </StackPanel>
             </Border>
 
@@ -91,7 +145,7 @@
                         <Run>Google, OpenAI-compatible, Ollama</Run>
                         <LineBreak/>
                         <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">TTS:</Run>
-                        <Run>SAPI5 (System.Speech)</Run>
+                        <Run>SAPI5, OpenAI-compatible, DeepInfra</Run>
                         <LineBreak/>
                         <Run FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}">MVVM:</Run>
                         <Run>CommunityToolkit.Mvvm</Run>
@@ -123,13 +177,22 @@
                         <TextBlock x:Name="HotkeyCopyLbl" Grid.Column="1" Text="Copy selected text and translate"
                                    Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                     </Grid>
-                    <Grid>
+                    <Grid Margin="0,0,0,4">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="100"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="Alt+X" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
                         <TextBlock x:Name="HotkeyStopLbl" Grid.Column="1" Text="Stop speech"
+                                   Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
+                    </Grid>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Alt+S" Foreground="{StaticResource TextPrimaryBrush}" FontSize="12" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="HotkeyScreenshotLbl" Grid.Column="1" Text="Screenshot current monitor"
                                    Foreground="{StaticResource TextSecondaryBrush}" FontSize="12"/>
                     </Grid>
                 </StackPanel>

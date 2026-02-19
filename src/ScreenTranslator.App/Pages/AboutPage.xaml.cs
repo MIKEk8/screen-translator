@@ -42,6 +42,8 @@ public partial class AboutPage : Page
         HotkeyCaptureLbl.Text = _loc.T("about.hotkey_capture");
         HotkeyCopyLbl.Text = _loc.T("about.hotkey_copy");
         HotkeyStopLbl.Text = _loc.T("about.hotkey_stop");
+        HotkeyScreenshotLbl.Text = _loc.T("about.hotkey_screenshot");
+        WhatsNewSectionText.Text = _loc.T("about.whats_new");
         GestureSectionText.Text = _loc.T("about.gesture");
         GestureDescText.Text = _loc.T("about.gesture_desc");
         GestureConfigText.Text = _loc.T("about.gesture_config");
@@ -124,6 +126,9 @@ public partial class AboutPage : Page
         UpdateBtn.IsEnabled = false;
         CheckUpdatesBtn.IsEnabled = false;
         UpdateStatusText.Text = _loc.T("about.updating");
+        DownloadProgressPanel.Visibility = Visibility.Visible;
+        DownloadProgressBar.Value = 0;
+        DownloadProgressText.Text = "0%";
 
         try
         {
@@ -135,11 +140,43 @@ public partial class AboutPage : Page
             if (File.Exists(zipPath)) File.Delete(zipPath);
             if (Directory.Exists(stagingDir)) Directory.Delete(stagingDir, true);
 
-            // Download zip
+            // Download zip with progress
             using var http = new HttpClient();
             http.DefaultRequestHeaders.Add("User-Agent", "ScreenTranslator");
-            var bytes = await http.GetByteArrayAsync(info.AssetUrl);
-            await File.WriteAllBytesAsync(zipPath, bytes);
+            using var response = await http.GetAsync(info.AssetUrl, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+
+            var totalBytes = response.Content.Headers.ContentLength ?? -1;
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
+            await using var fileStream = File.Create(zipPath);
+
+            var buffer = new byte[81920];
+            long downloaded = 0;
+            int bytesRead;
+
+            while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)
+            {
+                await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead));
+                downloaded += bytesRead;
+
+                if (totalBytes > 0)
+                {
+                    var pct = (int)(downloaded * 100 / totalBytes);
+                    DownloadProgressBar.Value = pct;
+                    var mb = downloaded / (1024.0 * 1024.0);
+                    var totalMb = totalBytes / (1024.0 * 1024.0);
+                    DownloadProgressText.Text = $"{pct}%  ({mb:F1}/{totalMb:F1} MB)";
+                }
+                else
+                {
+                    var mb = downloaded / (1024.0 * 1024.0);
+                    DownloadProgressText.Text = $"{mb:F1} MB";
+                }
+            }
+
+            DownloadProgressBar.Value = 100;
+            DownloadProgressText.Text = "100%";
+            UpdateStatusText.Text = _loc.T("about.extracting");
 
             // Extract to staging
             ZipFile.ExtractToDirectory(zipPath, stagingDir);
@@ -170,6 +207,7 @@ public partial class AboutPage : Page
         catch (Exception ex)
         {
             UpdateStatusText.Text = _loc.T("status.error", ex.Message);
+            DownloadProgressPanel.Visibility = Visibility.Collapsed;
             UpdateBtn.IsEnabled = true;
             CheckUpdatesBtn.IsEnabled = true;
         }
